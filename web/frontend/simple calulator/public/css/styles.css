@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
+
+body {
+    background: linear-gradient(to right, #1c1c1c, #2c3e50);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.calculator {
+    background-color: #1b1b1b;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    border: 2px solid #444;
+    width: 360px;
+    height: 540px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.display {
+    background-color: #222;
+    color: #00aaff;
+    padding: 20px;
+    border-radius: 6px;
+    text-align: right;
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+    font-family: 'Orbitron', sans-serif; /* Updated font */
+}
+
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.btn {
+    background-color: #333;
+    border: none;
+    color: #f0f0f0;
+    padding: 25px;
+    border-radius: 10px;
+    font-size: 1.4rem;
+    font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background-color: #444;
+}
+
+.btn:active {
+    transform: scale(0.95);
+    background-color: #555;
+}
+
+/* Animation Design Below Numbers */
+.glow-animation {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    height: 8px;
+    background: linear-gradient(90deg, rgba(0, 170, 255, 0.5), rgba(255, 255, 255, 0.1), rgba(0, 170, 255, 0.5));
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.7);
+    animation: glow 3s infinite alternate;
+}
+
+@keyframes glow {
+    0% { transform: translateX(-50%) scaleX(1); opacity: 0.5; }
+    50% { transform: translateX(-50%) scaleX(1.2); opacity: 1; }
+    100% { transform: translateX(-50%) scaleX(1); opacity: 0.5; }
+}
+
+/* Fancy Background Elements with More Bubbles */
+body::before, body::after,
+.bubble-1, .bubble-2, .bubble-3 {
+    content: '';
+    position: absolute;
+    background: radial-gradient(circle, #7a7a7a33, transparent);
+    border-radius: 50%;
+    z-index: -1;
+    animation: float 8s ease-in-out infinite;
+}
+
+body::before { top: 5%; left: -10%; width: 300px; height: 300px; }
+body::after { bottom: 10%; right: -15%; width: 300px; height: 300px; }
+.bubble-1 { top: 20%; right: 10%; width: 150px; height: 150px; animation-duration: 6s; }
+.bubble-2 { bottom: 30%; left: 5%; width: 100px; height: 100px; animation-duration: 7s; }
+.bubble-3 { top: 50%; right: 20%; width: 80px; height: 80px; animation-duration: 5s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+
+
+
+
+
+

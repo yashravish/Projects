@@ -1,0 +1,14 @@
+{
+    "name": "musical-pitch-training-game",
+    "version": "1.0.0",
+    "description": "An interactive musical pitch training game.",
+    "main": "index.html",
+    "scripts": {
+        "build-css": "tailwindcss -i ./styles.css -o ./dist/styles.css --watch"
+    },
+    "dependencies": {
+        "tailwindcss": "^3.4.14"
+    },
+    "author": "",
+    "license": "ISC"
+}
