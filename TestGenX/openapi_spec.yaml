@@ -1,0 +1,22 @@
+openapi: "3.0.0"
+info:
+  title: Sample API
+  version: "1.0"
+paths:
+  /:
+    get:
+      summary: Root endpoint
+      responses:
+        '200':
+          description: OK
+  /items:
+    get:
+      summary: Get items
+      responses:
+        '200':
+          description: Successful operation
+    post:
+      summary: Create item
+      responses:
+        '200':
+          description: Successful creation

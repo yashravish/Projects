@@ -1,0 +1,7 @@
+requests
+python-dotenv
+flask
+flask-sqlalchemy
+pylint
+bandit
+eslint

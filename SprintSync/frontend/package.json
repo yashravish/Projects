@@ -1,0 +1,19 @@
+{
+    "name": "sprintsync-frontend",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+      "axios": "^0.27.2",
+      "react": "^18.0.0",
+      "react-dom": "^18.0.0",
+      "react-scripts": "5.0.1",
+      "sockjs-client": "^1.5.1",
+      "@stomp/stompjs": "^6.1.0"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build"
+    },
+    "proxy": "http://localhost:8080"
+  }
+  

@@ -1,0 +1,21 @@
+name: docusync
+description: A Flutter collaborative Markdown editor with version control.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.0.0
+  firebase_database: ^10.0.0
+  flutter_markdown: ^0.6.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
