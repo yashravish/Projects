@@ -1,0 +1,49 @@
+@page "/audit"
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h2>Audit Trail</h2>
+
+@if (auditRecords == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Record ID</th>
+                <th>Action</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in auditRecords)
+            {
+                <tr>
+                    <td>@record.Id</td>
+                    <td>@record.Action</td>
+                    <td>@record.Timestamp</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private AuditRecord[]? auditRecords;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // In production, call an API to retrieve audit records from Azure SQL.
+        auditRecords = await Http.GetFromJsonAsync<AuditRecord[]>("api/audit");
+    }
+
+    public class AuditRecord
+    {
+        public int Id { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+}

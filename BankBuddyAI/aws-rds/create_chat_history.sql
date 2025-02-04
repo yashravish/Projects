@@ -1,0 +1,7 @@
+CREATE TABLE ChatHistory (
+    ChatId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId VARCHAR(50) NOT NULL,
+    Message TEXT NOT NULL,
+    Response TEXT NOT NULL,
+    Timestamp DATETIME DEFAULT GETDATE()
+);
