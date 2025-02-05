@@ -1,0 +1,13 @@
+/* Example custom CSS for gallery items */
+.repeaterItem {
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+  }
+  
+  .repeaterItem:hover {
+    transform: scale(1.02);
+  }
+  

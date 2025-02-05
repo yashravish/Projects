@@ -1,0 +1,15 @@
+<section id="blog" class="blog">
+  <div class="container">
+    <h2>Latest Articles</h2>
+    <div class="blog-posts">
+      {% for article in blogs.articles.articles limit: 3 %}
+        <article class="blog-post">
+          <a href="{{ article.url }}">
+            <h3>{{ article.title }}</h3>
+            <p>{{ article.excerpt | strip_html | truncate: 150 }}</p>
+          </a>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>

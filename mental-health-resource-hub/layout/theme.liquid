@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }} - Mental Health Resource Hub</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ shop.meta_description }}">
+    <!-- Shopify styles -->
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+    <!-- Custom styles -->
+    {{ 'custom.css' | asset_url | stylesheet_tag }}
+  </head>
+  <body>
+    {% include 'header' %}
+
+    <main role="main">
+      {{ content_for_layout }}
+    </main>
+
+    {% include 'footer' %}
+
+    <!-- Shopify & Custom Scripts -->
+    {{ 'theme.js' | asset_url | script_tag }}
+  </body>
+</html>

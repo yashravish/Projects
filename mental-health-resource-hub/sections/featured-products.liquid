@@ -1,0 +1,21 @@
+<section id="featured-products" class="featured-products">
+  <div class="container">
+    <h2>Featured Wellness Products</h2>
+    <div class="product-grid">
+      {% assign featured = collections['wellness-featured'] %}
+      {% if featured.products.size > 0 %}
+        {% for product in featured.products %}
+          <div class="product-card">
+            <a href="{{ product.url }}">
+              <img src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
+              <h3>{{ product.title }}</h3>
+              <p>{{ product.price | money }}</p>
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No featured products available.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
