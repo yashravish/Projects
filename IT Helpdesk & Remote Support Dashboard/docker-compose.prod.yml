@@ -1,0 +1,12 @@
+# docker-compose.prod.yml
+services:
+  backend:
+    image: azurecr.io/helpdesk-backend:latest
+    environment:
+      - AD_LDAP_URL=ldaps://your-ad-server
+      - DB_URL=postgresql://...
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G

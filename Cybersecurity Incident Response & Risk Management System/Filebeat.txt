@@ -1,0 +1,10 @@
+# Filebeat configuration for incident logs
+filebeat.inputs:
+- type: log
+  paths:
+    - /var/log/cyber/incidents.log
+  fields:
+    type: security_incident
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
