@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen overflow-x-hidden;
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-gray-900/60 backdrop-blur-xl border border-gray-700/30 rounded-3xl shadow-lg transform-gpu transition-all duration-300;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  }
+  
+  .glass-button {
+    @apply bg-gray-800/40 hover:bg-primary-600/90 text-white rounded-2xl px-5 py-2.5 transition-all duration-300 border border-gray-700/30 shadow-lg hover:shadow-primary-500/20 backdrop-blur-sm;
+  }
+
+  .neon-border {
+    @apply border-2 border-primary-400/80 shadow-[0_0_15px_rgba(56,189,248,0.4)];
+  }
+
+  .neon-text {
+    @apply text-primary-300 drop-shadow-[0_0_12px_rgba(56,189,248,0.4)];
+  }
+
+  .card-hover {
+    @apply hover:shadow-[0_10px_40px_-15px_rgba(56,189,248,0.3)] hover:border-primary-500/40 hover:-translate-y-1;
+  }
+}
+
+/* Animated background bubbles */
+.bubble {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.2), transparent);
+  backdrop-filter: blur(1px);
+  animation: float-around 20s linear infinite;
+  z-index: -1;
+  border: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 20%;
+  height: 20%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+@keyframes float-around {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(30px, -50px) rotate(120deg);
+  }
+  66% {
+    transform: translate(-20px, 20px) rotate(240deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}

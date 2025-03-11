@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-gray-50;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-xl;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg 
+         hover:from-blue-600 hover:to-blue-700 transition-all duration-200 
+         shadow-lg hover:shadow-blue-500/25 flex items-center justify-center gap-2;
+}
+
+.btn-danger {
+  @apply text-red-500 hover:text-red-600 transition-colors duration-200;
+}
+
+.input-field {
+  @apply mt-1 block w-full rounded-lg border-gray-200 shadow-sm 
+         focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 
+         border border-gray-100 overflow-hidden;
+}
