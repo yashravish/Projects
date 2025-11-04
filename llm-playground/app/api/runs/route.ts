@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth-helpers";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";

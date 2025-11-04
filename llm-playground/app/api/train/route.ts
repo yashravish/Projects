@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth-helpers";
 
 export const runtime = "nodejs";
 

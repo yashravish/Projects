@@ -2,10 +2,11 @@ import ReplayPlayer from "@/components/ReplayPlayer";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 
-type Props = { params: { id: string } };
+type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const run = await prisma.run.findUnique({ where: { id: params.id } });
+  const { id } = await params;
+  const run = await prisma.run.findUnique({ where: { id } });
   if (!run || !run.is_public) return { title: "Replay not available" };
   return {
     title: `Replay – ${run.model}`,
@@ -23,7 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ReplayPage({ params }: Props) {
-  const run = await prisma.run.findUnique({ where: { id: params.id } });
+  const { id } = await params;
+  const run = await prisma.run.findUnique({ where: { id } });
   if (!run || !run.is_public) {
     return (
       <main className="min-h-screen p-6">

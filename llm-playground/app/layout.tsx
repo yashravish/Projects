@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import SignInOut from "@/components/SignInOut";
 import { Providers } from "./providers";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth-helpers";
 
 export const metadata = {
   title: "LLM Playground",

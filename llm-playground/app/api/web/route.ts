@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth-helpers";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logError } from "@/lib/errors";
 import { LIMITS, WEB_LIMITS } from "@/lib/constants";

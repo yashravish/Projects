@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { requireEnv } from "@/lib/env";
 import { z } from "zod";
 import { ALLOWED_MODELS } from "@/lib/models";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/lib/auth-helpers";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { sanitizePrompt } from "@/lib/validation";
 import { logError } from "@/lib/errors";
