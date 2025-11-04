@@ -1,0 +1,45 @@
+{
+  "name": "vdiagram",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Vector DB to Mermaid diagram CLI (offline-first)",
+  "type": "module",
+  "bin": {
+    "vdiagram": "dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsup src/cli.ts --format esm,cjs --dts --sourcemap --external @lancedb/lancedb",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mermaid",
+    "cli",
+    "vector",
+    "embeddings",
+    "offline"
+  ],
+  "dependencies": {
+    "@xenova/transformers": "^2.16.0",
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "kleur": "^4.1.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.1"
+  }
+}
+
+
