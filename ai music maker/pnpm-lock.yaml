@@ -94,10 +94,10 @@ importers:
         version: 1.1.6(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@supabase/ssr':
         specifier: latest
-        version: 0.7.0(@supabase/supabase-js@2.78.0)
+        version: 0.7.0(@supabase/supabase-js@2.79.0)
       '@supabase/supabase-js':
         specifier: latest
-        version: 2.78.0
+        version: 2.79.0
       '@vercel/analytics':
         specifier: 1.3.1
         version: 1.3.1(next@15.5.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
@@ -784,8 +784,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@radix-ui/react-primitive@2.1.3':
-    resolution: {integrity: sha512-m9gTwRkhy2lvCPe6QJp4d3G1TYEUHn/FzJUtq9MjH46an1wJU+GdoGC5VLof8RX8Ft/DlpshApkhswDLZzHIcQ==}
+  '@radix-ui/react-primitive@2.1.4':
+    resolution: {integrity: sha512-9hQc4+GNVtJAIEPEqlYqW5RiYdrr8ea5XQ0ZOnD6fgru+83kqT15mq2OCcbe8KnjRZl5vF3ks69AKz3kh1jrhg==}
     peerDependencies:
       '@types/react': '*'
       '@types/react-dom': '*'
@@ -897,8 +897,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@radix-ui/react-slot@1.2.3':
-    resolution: {integrity: sha512-aeNmHnBxbi2St0au6VBVC7JXFlhLlOnvIIlePNniyUNAClzmtAUEY8/pBiK3iHjufOlwA+c20/8jngo7xcrg8A==}
+  '@radix-ui/react-slot@1.2.4':
+    resolution: {integrity: sha512-Jl+bCv8HxKnlTLVrcDE8zTMJ09R9/ukw4qBs/oZClOfoQk/cOTbDn+NceXfV7j09YPVQUryJPHurafcSg6EVKA==}
     peerDependencies:
       '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
@@ -1072,32 +1072,34 @@ packages:
   '@radix-ui/rect@1.1.0':
     resolution: {integrity: sha512-A9+lCBZoaMJlVKcRBz2YByCG+Cp2t6nAnMnNba+XiWxnj6r4JUFqfsgwocMBZU9LPtdxC6wB56ySYpc7LQIoJg==}
 
-  '@supabase/auth-js@2.78.0':
-    resolution: {integrity: sha512-cXDtu1U0LeZj/xfnFoV7yCze37TcbNo8FCxy1FpqhMbB9u9QxxDSW6pA5gm/07Ei7m260Lof4CZx67Cu6DPeig==}
+  '@supabase/auth-js@2.79.0':
+    resolution: {integrity: sha512-p2GKvdbF9d/6C+dtS6iNcSicPr6eUfkvovD60HWlWsD+oOjC483DzFWrzGjNpBwnswhfMRP8Qn3rYA0VWaOfjw==}
+    engines: {node: '>=20.0.0'}
 
-  '@supabase/functions-js@2.78.0':
-    resolution: {integrity: sha512-t1jOvArBsOINyqaRee1xJ3gryXLvkBzqnKfi6q3YRzzhJbGS6eXz0pXR5fqmJeB01fLC+1njpf3YhMszdPEF7g==}
+  '@supabase/functions-js@2.79.0':
+    resolution: {integrity: sha512-WaiU6b+Z+ZfJOjFhpMKdajt42weiFUrA6TVW5oGd6WfPGajFiKZJJIAvuK0g7KDKaYowtQrOo5+Ais+PcuZ1qA==}
+    engines: {node: '>=20.0.0'}
 
-  '@supabase/node-fetch@2.6.15':
-    resolution: {integrity: sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==}
-    engines: {node: 4.x || >=6.0.0}
+  '@supabase/postgrest-js@2.79.0':
+    resolution: {integrity: sha512-2i8EFm3/49ecjt6dk/TGVROBbtOmhryiC4NL3u0FBIrm2hqj+FvbELv1jjM6r+a6abnh+uzIV/bFsWHAa/k3/w==}
+    engines: {node: '>=20.0.0'}
 
-  '@supabase/postgrest-js@2.78.0':
-    resolution: {integrity: sha512-AwhpYlSvJ+PSnPmIK8sHj7NGDyDENYfQGKrMtpVIEzQA2ApUjgpUGxzXWN4Z0wEtLQsvv7g4y9HVad9Hzo1TNA==}
-
-  '@supabase/realtime-js@2.78.0':
-    resolution: {integrity: sha512-rCs1zmLe7of7hj4s7G9z8rTqzWuNVtmwDr3FiCRCJFawEoa+RQO1xpZGbdeuVvVmKDyVN6b542Okci+117y/LQ==}
+  '@supabase/realtime-js@2.79.0':
+    resolution: {integrity: sha512-foaZujNBycAqLizUcuLyyFyDitfPnEMVO4CiKXNwaMCDVMoVX4QR6n4gpJLUC5BGzc20Mte6vSJLbk4MN90Prw==}
+    engines: {node: '>=20.0.0'}
 
   '@supabase/ssr@0.7.0':
     resolution: {integrity: sha512-G65t5EhLSJ5c8hTCcXifSL9Q/ZRXvqgXeNo+d3P56f4U1IxwTqjB64UfmfixvmMcjuxnq2yGqEWVJqUcO+AzAg==}
     peerDependencies:
       '@supabase/supabase-js': ^2.43.4
 
-  '@supabase/storage-js@2.78.0':
-    resolution: {integrity: sha512-n17P0JbjHOlxqJpkaGFOn97i3EusEKPEbWOpuk1r4t00Wg06B8Z4GUiq0O0n1vUpjiMgJUkLIMuBVp+bEgunzQ==}
+  '@supabase/storage-js@2.79.0':
+    resolution: {integrity: sha512-PLSeKX1/BZhGWCT972w4TvVOCcw/xh4TsowtUBiZvPx4OdHT7dB1q0DXKwVUfKbWk5UUC+6XAq4ZU/ZCtdgn6w==}
+    engines: {node: '>=20.0.0'}
 
-  '@supabase/supabase-js@2.78.0':
-    resolution: {integrity: sha512-xYMRNBFmKp2m1gMuwcp/gr/HlfZKqjye1Ib8kJe29XJNsgwsfO/f8skxnWiscFKTlkOKLuBexNgl5L8dzGt6vA==}
+  '@supabase/supabase-js@2.79.0':
+    resolution: {integrity: sha512-x9ndEaBSwoRnFOOZGhh2CeV69Uz4B/EOSGCbKysDhTiYakiCAdDXaNuLPluviKU/Aot+F7BglXZDZ0YJ3GpGrw==}
+    engines: {node: '>=20.0.0'}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -1256,8 +1258,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  baseline-browser-mapping@2.8.23:
-    resolution: {integrity: sha512-616V5YX4bepJFzNyOfce5Fa8fDJMfoxzOIzDCZwaGL8MKVpFrXqfNUoIpRn9YMI5pXf/VKgzjB4htFMsFKKdiQ==}
+  baseline-browser-mapping@2.8.24:
+    resolution: {integrity: sha512-uUhTRDPXamakPyghwrUcjaGvvBqGrWvBHReoiULMIpOJVM9IYzQh83Xk2Onx5HlGI2o10NNCzcs9TG/S3TkwrQ==}
     hasBin: true
 
   browserslist@4.27.0:
@@ -1698,9 +1700,6 @@ packages:
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
 
-  tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -1748,12 +1747,6 @@ packages:
 
   victory-vendor@36.9.2:
     resolution: {integrity: sha512-PnpQQMuxlwYdocC8fIJqVXvkeViHYzotI+NJrCuav0ZYFoq912ZHBk3mCeuj+5/VpodOjPe1z0Fk2ihgzlXqjQ==}
-
-  webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-
-  whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
   ws@8.18.3:
     resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
@@ -2328,9 +2321,9 @@ snapshots:
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
 
-  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@radix-ui/react-primitive@2.1.4(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@radix-ui/react-slot': 1.2.3(@types/react@19.2.2)(react@19.2.0)
+      '@radix-ui/react-slot': 1.2.4(@types/react@19.2.2)(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
     optionalDependencies:
@@ -2463,7 +2456,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.2
 
-  '@radix-ui/react-slot@1.2.3(@types/react@19.2.2)(react@19.2.0)':
+  '@radix-ui/react-slot@1.2.4(@types/react@19.2.2)(react@19.2.0)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.2)(react@19.2.0)
       react: 19.2.0
@@ -2630,28 +2623,20 @@ snapshots:
 
   '@radix-ui/rect@1.1.0': {}
 
-  '@supabase/auth-js@2.78.0':
+  '@supabase/auth-js@2.79.0':
     dependencies:
-      '@supabase/node-fetch': 2.6.15
       tslib: 2.8.1
 
-  '@supabase/functions-js@2.78.0':
+  '@supabase/functions-js@2.79.0':
     dependencies:
-      '@supabase/node-fetch': 2.6.15
       tslib: 2.8.1
 
-  '@supabase/node-fetch@2.6.15':
+  '@supabase/postgrest-js@2.79.0':
     dependencies:
-      whatwg-url: 5.0.0
-
-  '@supabase/postgrest-js@2.78.0':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
       tslib: 2.8.1
 
-  '@supabase/realtime-js@2.78.0':
+  '@supabase/realtime-js@2.79.0':
     dependencies:
-      '@supabase/node-fetch': 2.6.15
       '@types/phoenix': 1.6.6
       '@types/ws': 8.18.1
       tslib: 2.8.1
@@ -2660,24 +2645,22 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@supabase/ssr@0.7.0(@supabase/supabase-js@2.78.0)':
+  '@supabase/ssr@0.7.0(@supabase/supabase-js@2.79.0)':
     dependencies:
-      '@supabase/supabase-js': 2.78.0
+      '@supabase/supabase-js': 2.79.0
       cookie: 1.0.2
 
-  '@supabase/storage-js@2.78.0':
+  '@supabase/storage-js@2.79.0':
     dependencies:
-      '@supabase/node-fetch': 2.6.15
       tslib: 2.8.1
 
-  '@supabase/supabase-js@2.78.0':
+  '@supabase/supabase-js@2.79.0':
     dependencies:
-      '@supabase/auth-js': 2.78.0
-      '@supabase/functions-js': 2.78.0
-      '@supabase/node-fetch': 2.6.15
-      '@supabase/postgrest-js': 2.78.0
-      '@supabase/realtime-js': 2.78.0
-      '@supabase/storage-js': 2.78.0
+      '@supabase/auth-js': 2.79.0
+      '@supabase/functions-js': 2.79.0
+      '@supabase/postgrest-js': 2.79.0
+      '@supabase/realtime-js': 2.79.0
+      '@supabase/storage-js': 2.79.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -2818,11 +2801,11 @@ snapshots:
       postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
-  baseline-browser-mapping@2.8.23: {}
+  baseline-browser-mapping@2.8.24: {}
 
   browserslist@4.27.0:
     dependencies:
-      baseline-browser-mapping: 2.8.23
+      baseline-browser-mapping: 2.8.24
       caniuse-lite: 1.0.30001753
       electron-to-chromium: 1.5.244
       node-releases: 2.0.27
@@ -2842,7 +2825,7 @@ snapshots:
     dependencies:
       '@radix-ui/react-dialog': 1.1.4(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@radix-ui/react-id': 1.1.1(@types/react@19.2.2)(react@19.2.0)
-      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@radix-ui/react-primitive': 2.1.4(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
       use-sync-external-store: 1.6.0(react@19.2.0)
@@ -3219,8 +3202,6 @@ snapshots:
 
   tiny-invariant@1.3.3: {}
 
-  tr46@0.0.3: {}
-
   tslib@2.8.1: {}
 
   tw-animate-css@1.3.3: {}
@@ -3270,13 +3251,6 @@ snapshots:
       d3-shape: 3.2.0
       d3-time: 3.1.0
       d3-timer: 3.0.1
-
-  webidl-conversions@3.0.1: {}
-
-  whatwg-url@5.0.0:
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
 
   ws@8.18.3: {}
 

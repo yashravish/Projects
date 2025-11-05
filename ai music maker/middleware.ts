@@ -17,3 +17,6 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }
+
+// Use Node.js runtime instead of Edge Runtime for Supabase compatibility
+export const runtime = 'nodejs'
