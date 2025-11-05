@@ -1,8 +1,15 @@
-import { updateSession } from "@/lib/supabase/middleware"
+import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+/**
+ * Middleware that runs on Edge Runtime.
+ * Supabase session management moved to individual server components/route handlers
+ * to avoid Edge Runtime compatibility issues.
+ */
+export function middleware(_request: NextRequest) {
+  // For now, just pass through all requests
+  // Auth checks are handled in server components and API routes
+  return NextResponse.next()
 }
 
 export const config = {
@@ -17,6 +24,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }
-
-// Use Node.js runtime instead of Edge Runtime for Supabase compatibility
-export const runtime = 'nodejs'
