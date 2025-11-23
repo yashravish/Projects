@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Fill Rate Report";
+}
+
+<h2>Order Fill Rate</h2>
+<p>Percentage of ordered quantity successfully shipped on first attempt.</p>
+
+<table class="table table-hover" id="fillRateTable">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Total Ordered</th>
+            <th>Total Shipped</th>
+            <th>Fill Rate %</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    async function loadReport() {
+        const response = await fetch(`/api/reports/fill-rate`);
+        const data = await response.json();
+
+        const tbody = document.querySelector('#fillRateTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+            let badgeClass = 'bg-success';
+            if (row.fillRatePercent < 90) badgeClass = 'bg-warning text-dark';
+            if (row.fillRatePercent < 75) badgeClass = 'bg-danger';
+
+            tbody.innerHTML += `<tr>
+                <td>${row.productName}</td>
+                <td>${row.totalOrdered}</td>
+                <td>${row.totalShipped}</td>
+                <td>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar ${badgeClass}" role="progressbar" style="width: ${row.fillRatePercent}%" aria-valuenow="${row.fillRatePercent}" aria-valuemin="0" aria-valuemax="100">${row.fillRatePercent}%</div>
+                    </div>
+                </td>
+            </tr>`;
+        });
+    }
+
+    loadReport();
+</script>
+

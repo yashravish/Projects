@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Inventory Aging";
+}
+
+<h2>Inventory Batch Aging</h2>
+<p class="text-muted">Shows days until expiry for all active batches.</p>
+
+<table class="table table-bordered" id="agingTable">
+    <thead class="table-dark">
+        <tr>
+            <th>Product</th>
+            <th>Batch #</th>
+            <th>Status</th>
+            <th>Remaining Qty</th>
+            <th>Days to Expiry</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    async function loadReport() {
+        const response = await fetch(`/api/reports/inventory-aging`);
+        const data = await response.json();
+
+        const tbody = document.querySelector('#agingTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+            let rowClass = '';
+            if (row.daysToExpiry < 30) rowClass = 'table-danger';
+            else if (row.daysToExpiry < 90) rowClass = 'table-warning';
+
+            tbody.innerHTML += `<tr class="${rowClass}">
+                <td>${row.productName}</td>
+                <td>${row.batchNumber}</td>
+                <td>${row.status}</td>
+                <td>${row.remainingQuantity}</td>
+                <td>${row.daysToExpiry} Days</td>
+            </tr>`;
+        });
+    }
+
+    loadReport();
+</script>
+

@@ -1,0 +1,134 @@
+@OperationsHub.Api_HostAddress = http://localhost:5051
+
+# ==========================
+# 1. Products & Inventory
+# ==========================
+
+### Get All Products
+GET {{OperationsHub.Api_HostAddress}}/api/products
+Accept: application/json
+
+### Get Specific Product
+GET {{OperationsHub.Api_HostAddress}}/api/products/1
+Accept: application/json
+
+### Create New Product
+POST {{OperationsHub.Api_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "sku": "TEST-PROD-001",
+  "name": "Test Protein Bar",
+  "category": "Snack"
+}
+
+### Get Warehouses
+GET {{OperationsHub.Api_HostAddress}}/api/warehouses
+Accept: application/json
+
+### Get Warehouse Inventory
+GET {{OperationsHub.Api_HostAddress}}/api/warehouses/1/inventory
+Accept: application/json
+
+### Manual Inventory Receipt
+POST {{OperationsHub.Api_HostAddress}}/api/inventory/movements
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "warehouseId": 1,
+  "quantity": 50,
+  "movementType": "Receipt",
+  "reference": "MANUAL-ADJ-001"
+}
+
+# ==========================
+# 2. Orders & Fulfillment
+# ==========================
+
+### Create Customer Order
+POST {{OperationsHub.Api_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "region": "US",
+  "externalOrderNumber": "WEB-1001",
+  "lines": [
+    {
+      "productId": 1,
+      "quantity": 10
+    },
+    {
+      "productId": 2,
+      "quantity": 5
+    }
+  ]
+}
+
+### Get All Orders
+GET {{OperationsHub.Api_HostAddress}}/api/orders
+Accept: application/json
+
+### Allocate Order (Replace {id} with actual ID from previous response, e.g. 1)
+POST {{OperationsHub.Api_HostAddress}}/api/orders/1/allocate
+Accept: application/json
+
+### Ship Order (Replace {id} with actual ID)
+POST {{OperationsHub.Api_HostAddress}}/api/orders/1/ship
+Accept: application/json
+
+# ==========================
+# 3. ERP Integration (Mock)
+# ==========================
+
+### Get Mock ERP Products
+GET {{OperationsHub.Api_HostAddress}}/mock-erp/products
+Accept: application/json
+
+### Get Mock ERP Orders
+GET {{OperationsHub.Api_HostAddress}}/mock-erp/orders
+Accept: application/json
+
+### Support: List Jobs
+GET {{OperationsHub.Api_HostAddress}}/Support/Jobs
+Accept: text/html
+
+### Support: Trigger Replay (Replace {id} with a valid Job ID)
+POST {{OperationsHub.Api_HostAddress}}/api/support/integration-jobs/1/replay
+Accept: application/json
+
+# ==========================
+# 4. Reporting
+# ==========================
+
+### Get Sales Report Data
+GET {{OperationsHub.Api_HostAddress}}/api/reports/sales?start=2024-01-01&end=2025-12-31
+Accept: application/json
+
+### Get Inventory Aging
+GET {{OperationsHub.Api_HostAddress}}/api/reports/inventory-aging
+Accept: application/json
+
+### Get Fill Rate
+GET {{OperationsHub.Api_HostAddress}}/api/reports/fill-rate
+Accept: application/json
+
+# ==========================
+# 5. Configuration & Automation
+# ==========================
+
+### Set Reorder Threshold
+POST {{OperationsHub.Api_HostAddress}}/api/configuration/reorder-thresholds
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "warehouseId": 1,
+  "minQuantity": 5000,
+  "reorderQuantity": 1000
+}
+
+### Check Suggestions (After inventory drops below 5000)
+GET {{OperationsHub.Api_HostAddress}}/api/configuration/replenishment-suggestions
+Accept: application/json

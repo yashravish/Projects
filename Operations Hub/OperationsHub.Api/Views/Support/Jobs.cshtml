@@ -1,0 +1,97 @@
+@model IEnumerable<OperationsHub.Api.Models.Entities.IntegrationJob>
+
+@{
+    ViewData["Title"] = "Integration Jobs";
+    int currentPage = (int?)ViewData["Page"] ?? 1;
+    string status = (string?)ViewData["CurrentStatus"] ?? "";
+    string type = (string?)ViewData["CurrentType"] ?? "";
+}
+
+<h2>Integration Jobs</h2>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="Running" selected="@(status == "Running")">Running</option>
+            <option value="Succeeded" selected="@(status == "Succeeded")">Succeeded</option>
+            <option value="Failed" selected="@(status == "Failed")">Failed</option>
+        </select>
+    </div>
+     <div class="col-auto">
+        <input type="text" name="jobType" class="form-control" placeholder="Job Type" value="@type">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Started At</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var job in Model)
+        {
+            string rowClass = job.Status == "Failed" ? "table-danger" : "";
+            var duration = job.FinishedAt.HasValue ? (job.FinishedAt.Value - job.StartedAt).TotalSeconds.ToString("F1") + "s" : "-";
+            
+            <tr class="@rowClass">
+                <td>@job.Id</td>
+                <td>@job.JobType</td>
+                <td>@job.StartedAt.ToString("g")</td>
+                <td>@duration</td>
+                <td>@job.Status</td>
+                <td>
+                    <a asp-action="JobDetails" asp-route-id="@job.Id" class="btn btn-sm btn-primary">Details</a>
+                    @if (job.Status == "Failed")
+                    {
+                        <button class="btn btn-sm btn-warning" onclick="replayJob(@job.Id)">Replay</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="?page=@(currentPage-1)&status=@status&jobType=@type">Previous</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page=@(currentPage+1)&status=@status&jobType=@type">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<script>
+    async function replayJob(id) {
+        if(!confirm('Are you sure you want to replay this job?')) return;
+        
+        const btn = event.target;
+        btn.disabled = true;
+        
+        try {
+            const res = await fetch(`/api/support/integration-jobs/${id}/replay`, { method: 'POST' });
+            if (res.ok) {
+                alert('Replay started successfully.');
+                location.reload();
+            } else {
+                alert('Replay failed.');
+            }
+        } catch (e) {
+            alert('Error triggering replay.');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+
