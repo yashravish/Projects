@@ -12,8 +12,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -21,6 +19,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Python lib directories (but not src/lib in JS projects)
+**/lib/
+**/lib64/
+!apps/web/src/lib/
 
 # Virtual environments
 .venv/
