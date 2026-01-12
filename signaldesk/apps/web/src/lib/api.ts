@@ -6,22 +6,32 @@ export async function apiRequest<T>(
 ): Promise<{ data?: T; error?: { code: string; message: string; details?: unknown } }> {
   const url = `${API_URL}${endpoint}`;
 
-  const response = await fetch(url, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
+  console.log('Making API request to:', url);
 
-  const result = await response.json();
+  try {
+    const response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
 
-  if (!response.ok) {
-    return { error: result.error };
+    console.log('Response status:', response.status);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('API error response:', result.error);
+      return { error: result.error };
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Network error:', error);
+    throw error;
   }
-
-  return result;
 }
 
 export async function uploadFile(

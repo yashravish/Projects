@@ -41,12 +41,14 @@ export default function SignupPage() {
       });
 
       if (result.error) {
+        console.error('API Error:', result.error);
         toast.error(result.error.message);
       } else {
         toast.success('Account created successfully!');
         router.push('/collections');
       }
-    } catch {
+    } catch (error) {
+      console.error('Signup error:', error);
       toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
