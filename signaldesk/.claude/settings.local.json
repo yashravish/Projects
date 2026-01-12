@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rev-parse:*)",
+      "Bash(railway --version:*)",
+      "Bash(npm install:*)",
+      "Bash(railway login:*)",
+      "Bash(railway whoami:*)",
+      "Bash(railway --help:*)",
+      "Bash(railway init:*)",
+      "Bash(railway list:*)",
+      "Bash(railway link:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(pnpm --filter @signaldesk/web build:*)"
+    ]
+  }
+}
