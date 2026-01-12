@@ -34,7 +34,7 @@ export default function LoginPage() {
         toast.success('Welcome back!');
         router.push('/collections');
       }
-    } catch (_error) {
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
