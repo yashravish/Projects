@@ -50,7 +50,7 @@ export async function documentsRoutes(fastify: FastifyInstance) {
 
       return reply.send({
         data: {
-          documents: documents.map((doc) => ({
+          documents: documents.map((doc: typeof documents[0]) => ({
             id: doc.id,
             filename: doc.filename,
             originalName: doc.originalName,

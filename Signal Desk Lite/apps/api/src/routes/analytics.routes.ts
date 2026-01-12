@@ -28,9 +28,9 @@ export async function analyticsRoutes(fastify: FastifyInstance) {
     ]);
 
     const queryCount = queryLogs.length;
-    const totalPromptTokens = queryLogs.reduce((sum, log) => sum + log.promptTokens, 0);
-    const totalCompletionTokens = queryLogs.reduce((sum, log) => sum + log.completionTokens, 0);
-    const totalTokens = queryLogs.reduce((sum, log) => sum + log.totalTokens, 0);
+    const totalPromptTokens = queryLogs.reduce((sum: number, log) => sum + log.promptTokens, 0);
+    const totalCompletionTokens = queryLogs.reduce((sum: number, log) => sum + log.completionTokens, 0);
+    const totalTokens = queryLogs.reduce((sum: number, log) => sum + log.totalTokens, 0);
 
     const embeddingCost =
       (totalPromptTokens / 1_000_000) * CONFIG.EMBEDDING_COST_PER_1M_TOKENS;
@@ -113,12 +113,12 @@ export async function analyticsRoutes(fastify: FastifyInstance) {
     ]);
 
     const queryCount = queryLogs.length;
-    const totalPromptTokens = queryLogs.reduce((sum, log) => sum + log.promptTokens, 0);
-    const totalCompletionTokens = queryLogs.reduce((sum, log) => sum + log.completionTokens, 0);
-    const totalTokens = queryLogs.reduce((sum, log) => sum + log.totalTokens, 0);
+    const totalPromptTokens = queryLogs.reduce((sum: number, log) => sum + log.promptTokens, 0);
+    const totalCompletionTokens = queryLogs.reduce((sum: number, log) => sum + log.completionTokens, 0);
+    const totalTokens = queryLogs.reduce((sum: number, log) => sum + log.totalTokens, 0);
     const avgLatencyMs =
       queryLogs.length > 0
-        ? queryLogs.reduce((sum, log) => sum + log.latencyMs, 0) / queryLogs.length
+        ? queryLogs.reduce((sum: number, log) => sum + log.latencyMs, 0) / queryLogs.length
         : 0;
 
     const embeddingCost =

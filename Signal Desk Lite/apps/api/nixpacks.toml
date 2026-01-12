@@ -8,9 +8,9 @@ cmds = [
 
 [phases.build]
 cmds = [
+  "cd apps/api && pnpm db:generate",
   "pnpm --filter @signaldesk/shared build",
-  "pnpm --filter @signaldesk/api build",
-  "cd apps/api && pnpm db:generate"
+  "pnpm --filter @signaldesk/api build"
 ]
 
 [start]

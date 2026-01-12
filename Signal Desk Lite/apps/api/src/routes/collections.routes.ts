@@ -22,7 +22,7 @@ export async function collectionsRoutes(fastify: FastifyInstance) {
 
     return reply.send({
       data: {
-        collections: collections.map((collection) => ({
+        collections: collections.map((collection: typeof collections[0]) => ({
           id: collection.id,
           name: collection.name,
           description: collection.description,

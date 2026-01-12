@@ -47,8 +47,6 @@ export async function performRAGQuery(
   collectionId: string,
   userId: string
 ): Promise<RAGResponse> {
-  const startTime = Date.now();
-
   const questionEmbedding = await generateEmbedding(question);
 
   let retrievedChunks: RetrievedChunk[];
@@ -80,7 +78,7 @@ export async function performRAGQuery(
       LIMIT ${CONFIG.RETRIEVAL_TOP_K}
     `;
 
-    retrievedChunks = chunks.map((chunk) => ({
+    retrievedChunks = chunks.map((chunk: typeof chunks[0]) => ({
       id: chunk.id,
       content: chunk.content,
       documentId: chunk.documentId,
@@ -107,7 +105,7 @@ export async function performRAGQuery(
       },
     });
 
-    retrievedChunks = chunks.map((chunk) => ({
+    retrievedChunks = chunks.map((chunk: typeof chunks[0]) => ({
       ...chunk,
       relevanceScore: 0,
     }));
@@ -125,12 +123,12 @@ export async function performRAGQuery(
     },
   });
 
-  const documentMap = new Map(documents.map((doc) => [doc.id, doc.originalName]));
+  const documentMap = new Map(documents.map((doc: typeof documents[0]) => [doc.id, doc.originalName]));
 
   const citations = retrievedChunks.map((chunk) => ({
     chunkId: chunk.id,
     documentId: chunk.documentId,
-    documentName: documentMap.get(chunk.documentId) || 'Unknown',
+    documentName: (documentMap.get(chunk.documentId) || 'Unknown') as string,
     chunkIndex: chunk.chunkIndex,
     content: chunk.content,
     relevanceScore: chunk.relevanceScore,
