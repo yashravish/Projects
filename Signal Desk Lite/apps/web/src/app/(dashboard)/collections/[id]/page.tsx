@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { apiRequest, uploadFile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, Upload, Send, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
