@@ -46,7 +46,7 @@ export default function SignupPage() {
         toast.success('Account created successfully!');
         router.push('/collections');
       }
-    } catch {
+    } catch (_error) {
       toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
