@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    container_name: practiceops-db-prod
+    environment:
+      POSTGRES_DB: practiceops
+      POSTGRES_USER: practiceops
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U practiceops -d practiceops"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    image: ${API_IMAGE}
+    container_name: practiceops-api-prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://practiceops:${POSTGRES_PASSWORD}@db:5432/practiceops
+      ENVIRONMENT: production
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  db_data:
