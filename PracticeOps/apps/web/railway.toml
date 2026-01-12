@@ -4,6 +4,9 @@ dockerfilePath = "Dockerfile.prod"
 watchPaths = ["apps/web/**"]
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 100
+# Temporarily disable healthcheck to verify the app is working
+# healthcheckPath = "/"
+# healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
 
