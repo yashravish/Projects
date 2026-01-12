@@ -34,7 +34,31 @@ async function start() {
     });
 
     await fastify.register(cors, {
-      origin: config.corsOrigins,
+      origin: (origin, cb) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
+          cb(null, true);
+          return;
+        }
+
+        // Check if origin matches configured CORS origins
+        const allowedOrigins = config.corsOrigins;
+
+        // Check if origin is in the allowed list
+        if (allowedOrigins.includes(origin)) {
+          cb(null, true);
+          return;
+        }
+
+        // Allow all Vercel preview and production domains
+        if (origin.endsWith('.vercel.app')) {
+          cb(null, true);
+          return;
+        }
+
+        // Reject other origins
+        cb(new Error('Not allowed by CORS'), false);
+      },
       credentials: true,
     });
 
