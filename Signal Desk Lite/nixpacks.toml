@@ -1,0 +1,20 @@
+[phases.setup]
+nixPkgs = ["nodejs-20_x", "pnpm"]
+
+[phases.install]
+cmds = [
+  "pnpm install"
+]
+
+[phases.build]
+cmds = [
+  "pnpm --filter @signaldesk/shared build",
+  "pnpm --filter @signaldesk/api build",
+  "cd apps/api && pnpm db:generate"
+]
+
+[start]
+cmd = "cd apps/api && node dist/index.js"
+
+[variables]
+NODE_VERSION = "20"
