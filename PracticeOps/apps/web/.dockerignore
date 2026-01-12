@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Testing
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# Build outputs (we'll create fresh in Docker)
+dist
+
+# Development
+.vscode
+.idea
+
+# Environment files (should be provided via Railway)
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.log
+*.tmp
+*.temp
+.DS_Store
