@@ -21,6 +21,12 @@ interface Document {
   createdAt: string;
 }
 
+interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 interface Citation {
   chunkId: string;
   documentName: string;
@@ -45,7 +51,7 @@ export default function CollectionDetailPage() {
 
   const { data: collection } = useQuery({
     queryKey: ['collection', params.id],
-    queryFn: () => apiRequest(`/v1/collections/${params.id}`),
+    queryFn: () => apiRequest<{ collection: Collection }>(`/v1/collections/${params.id}`),
   });
 
   const { data: documents, isLoading: documentsLoading } = useQuery({
