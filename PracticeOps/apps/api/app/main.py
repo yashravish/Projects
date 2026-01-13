@@ -56,6 +56,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Log CORS configuration for debugging
+logger.info(
+    "cors_configured",
+    origins=settings.cors_origins,
+    environment=settings.environment,
+    frontend_url=settings.frontend_url,
+)
+
 
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
