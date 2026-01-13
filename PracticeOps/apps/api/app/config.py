@@ -31,15 +31,27 @@ class Settings(BaseSettings):
     environment: str = "development"
 
     # CORS - accepts comma-separated string from env var
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # Use str type to prevent Pydantic from trying to parse as JSON
+    cors_origins: str | list[str] = "http://localhost:5173,http://127.0.0.1:5173"
 
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: Any) -> list[str]:
-        """Parse CORS origins from comma-separated string or list."""
+        """Parse CORS origins from comma-separated string, JSON array, or list.
+
+        Handles:
+        - Comma-separated string: "url1,url2,url3"
+        - Single URL string: "url1"
+        - List: ["url1", "url2"]
+        """
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+            # Split by comma and filter empty strings
+            origins = [origin.strip() for origin in v.split(",") if origin.strip()]
+            return origins if origins else ["http://localhost:5173"]
+        if isinstance(v, list):
+            return v
+        # Fallback to default
+        return ["http://localhost:5173", "http://127.0.0.1:5173"]
 
     # Frontend URL (for invite links)
     frontend_url: str = "http://localhost:5173"
