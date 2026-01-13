@@ -703,6 +703,14 @@ async def scheduler_lifespan(app: Any):  # noqa: ARG001
         app = FastAPI(lifespan=scheduler_lifespan)
     """
     # Startup
+    from app.config import settings
+
+    # Log CORS configuration for debugging deployment issues
+    logger.info(
+        f"CORS Configuration: origins={settings.cors_origins}, "
+        f"environment={settings.environment}, frontend_url={settings.frontend_url}"
+    )
+
     logger.info("Starting notification scheduler...")
     sched = setup_scheduler()
     sched.start()
