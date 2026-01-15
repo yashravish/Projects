@@ -1,0 +1,21 @@
+name: repo-sanity
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify repository layout
+        run: |
+          test -f vector_add.cu
+          test -f audio_gain.cu
+          test -f audio_mixer.cu
+          test -f simple_filter.cu
+          test -f Makefile
+          test -f README.md
+          test -f BUILDING.md

@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(python:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix Railway deployment configuration and health check\n\n- Update Dockerfile to use Railway''s dynamic PORT environment variable\n- Improve health check endpoint to return HTTP 503 when database is unavailable\n- Add comprehensive Railway deployment setup guide with environment variable configuration\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(find:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(git rev-parse:*)"
     ]
   }
 }
