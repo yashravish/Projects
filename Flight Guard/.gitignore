@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+*.o
+*.exe
+
+# Coverage artifacts
+*.gcno
+*.gcda
+*.gcov
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
