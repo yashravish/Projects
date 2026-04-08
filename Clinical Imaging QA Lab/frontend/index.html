@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clinical Imaging QA Lab — Dashboard showing device status, capture summaries, and recent activity.">
+  <title>Dashboard — Clinical Imaging QA Lab</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <nav class="nav-container" aria-label="Main navigation">
+      <div class="nav-logo">
+        <div class="nav-logo-icon" aria-hidden="true">QA</div>
+        Clinical Imaging QA Lab
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">☰</button>
+      <ul class="nav-links" id="nav-menu" role="menubar">
+        <li role="none"><a href="index.html" class="active" role="menuitem">Dashboard</a></li>
+        <li role="none"><a href="capture.html" role="menuitem">Capture</a></li>
+        <li role="none"><a href="history.html" role="menuitem">History</a></li>
+        <li role="none"><a href="defects.html" role="menuitem">Defects</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Real-time overview of imaging operations and quality metrics</p>
+    </div>
+
+    <div id="dashboard-alert" class="alert alert-info" hidden aria-live="polite"></div>
+
+    <section aria-label="Device status" id="device-status-area">
+      <div class="loading-overlay"><span class="spinner"></span> Loading device status…</div>
+    </section>
+
+    <section aria-label="Summary statistics">
+      <div class="stats-grid" id="stats-area">
+        <div class="stat-card">
+          <div class="stat-icon primary" aria-hidden="true">📷</div>
+          <div class="stat-content"><h3>—</h3><p>Total Captures</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon success" aria-hidden="true">✓</div>
+          <div class="stat-content"><h3>—</h3><p>Successful</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon danger" aria-hidden="true">✕</div>
+          <div class="stat-content"><h3>—</h3><p>Failed</p></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning" aria-hidden="true">🐛</div>
+          <div class="stat-content"><h3>—</h3><p>Open Defects</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid">
+      <section class="card" aria-label="Recent captures">
+        <div class="card-header">
+          <h2 class="card-title">Recent Captures</h2>
+          <a href="history.html" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Patient</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+                <th scope="col">Date</th>
+                <th scope="col">Retries</th>
+              </tr>
+            </thead>
+            <tbody id="recent-captures-body">
+              <tr><td colspan="5" class="loading-overlay"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Recent defects">
+        <div class="card-header">
+          <h2 class="card-title">Recent Defects</h2>
+          <a href="defects.html" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="recent-defects-body">
+              <tr><td colspan="4" class="loading-overlay"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>Clinical Imaging QA Lab &copy; 2026 — Portfolio Project</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    document.querySelector('.nav-toggle').addEventListener('click', function() {
+      const menu = document.getElementById('nav-menu');
+      const expanded = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', !expanded);
+      menu.classList.toggle('open');
+    });
+  </script>
+</body>
+</html>
