@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL Database ────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: eig_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: eig_db
+      POSTGRES_USER: eig_user
+      POSTGRES_PASSWORD: eig_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eig_user -d eig_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Mock External Providers (CRM + Vendor XML) ────────────────────────────────
+  mock_providers:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: eig_mock_providers
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Main Application ──────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eig_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://eig_user:eig_password@db:5432/eig_db
+      CRM_BASE_URL: http://mock_providers:8001
+      VENDOR_BASE_URL: http://mock_providers:8001
+      APP_ENV: production
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+      SCHEDULER_ENABLED: "true"
+      CRM_SYNC_INTERVAL_MINUTES: "15"
+      VENDOR_SYNC_INTERVAL_MINUTES: "15"
+    depends_on:
+      db:
+        condition: service_healthy
+      mock_providers:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    name: eig_postgres_data

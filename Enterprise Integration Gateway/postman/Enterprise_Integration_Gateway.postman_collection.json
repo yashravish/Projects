@@ -1,0 +1,576 @@
+{
+  "info": {
+    "_postman_id": "eig-collection-v1",
+    "name": "Enterprise Integration Gateway",
+    "description": "Complete API test collection for the Enterprise Integration Gateway.\n\nWorkflows:\n1. Happy Path: Health → CRM Sync → View Customers → View Orders\n2. Vendor Sync: Vendor Sync → View Shipments → Check Failed Records\n3. Full Sync: Sync All → Admin Status\n4. Failure & Retry: View Failed Records → Retry Record",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health & Metrics",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is healthy', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('healthy');",
+                  "});",
+                  "pm.test('DB check present', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.checks).to.have.property('database');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "health"]
+            },
+            "description": "Returns application health including database connectivity."
+          }
+        },
+        {
+          "name": "Metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has customer count', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('eig_customers_total');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "metrics"]
+            },
+            "description": "Lightweight metrics: total record counts."
+          }
+        },
+        {
+          "name": "Admin Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has record counts', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('record_counts');",
+                  "    pm.expect(body).to.have.property('failed_records');",
+                  "    pm.expect(body).to.have.property('recent_sync_jobs');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/admin/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "status"]
+            },
+            "description": "Operational dashboard: counts, recent jobs, failed records, scheduler state."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sync Triggers",
+      "item": [
+        {
+          "name": "Trigger CRM Sync",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has job_id', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('job_id');",
+                  "    pm.environment.set('last_job_id', body.job_id);",
+                  "});",
+                  "pm.test('Job type is crm_sync', () => {",
+                  "    pm.expect(pm.response.json().job_type).to.eql('crm_sync');",
+                  "});",
+                  "pm.test('Has correlation_id', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('correlation_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/sync/crm",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "sync", "crm"]
+            },
+            "description": "Triggers a CRM JSON sync. Fetches customers and orders, transforms, and upserts."
+          }
+        },
+        {
+          "name": "Trigger Vendor Sync",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Job type is vendor_sync', () => {",
+                  "    pm.expect(pm.response.json().job_type).to.eql('vendor_sync');",
+                  "});",
+                  "pm.test('Records failed ≥ 1 (malformed XML record)', () => {",
+                  "    pm.expect(pm.response.json().records_failed).to.be.at.least(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/sync/vendor",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "sync", "vendor"]
+            },
+            "description": "Triggers a Vendor XML sync. Includes one malformed record — expect records_failed >= 1."
+          }
+        },
+        {
+          "name": "Trigger Full Sync (CRM + Vendor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Job type is full_sync', () => {",
+                  "    pm.expect(pm.response.json().job_type).to.eql('full_sync');",
+                  "});",
+                  "pm.test('Records processed > 0', () => {",
+                  "    pm.expect(pm.response.json().records_processed).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/sync/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "sync", "all"]
+            },
+            "description": "Triggers both CRM and Vendor syncs sequentially. Returns aggregated result."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List All Customers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/customers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "customers"]
+            }
+          }
+        },
+        {
+          "name": "List Customers (CRM source only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/customers?source=crm",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "customers"],
+              "query": [{"key": "source", "value": "crm"}]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/customers/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "customers", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List All Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "List Orders (vendor source)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/orders?source=vendor",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [{"key": "source", "value": "vendor"}]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/orders/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipments",
+      "item": [
+        {
+          "name": "List All Shipments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/shipments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "shipments"]
+            }
+          }
+        },
+        {
+          "name": "List Shipments (in_transit)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/shipments?status=in_transit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "shipments"],
+              "query": [{"key": "status", "value": "in_transit"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Integration Jobs",
+      "item": [
+        {
+          "name": "List All Jobs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.length > 0) {",
+                  "    pm.environment.set('last_job_id', body[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/integration-jobs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "integration-jobs"]
+            }
+          }
+        },
+        {
+          "name": "List Jobs (crm_sync only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/integration-jobs?job_type=crm_sync",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "integration-jobs"],
+              "query": [{"key": "job_type", "value": "crm_sync"}]
+            }
+          }
+        },
+        {
+          "name": "Get Job by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/integration-jobs/{{last_job_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "integration-jobs", "{{last_job_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Failed Records",
+      "item": [
+        {
+          "name": "List All Failed Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.length > 0) {",
+                  "    pm.environment.set('last_failed_record_id', body[0].id);",
+                  "    console.log('Set last_failed_record_id to', body[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/failed-records",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "failed-records"]
+            }
+          }
+        },
+        {
+          "name": "List Failed Records (vendor source)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/failed-records?source=vendor",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "failed-records"],
+              "query": [{"key": "source", "value": "vendor"}]
+            }
+          }
+        },
+        {
+          "name": "Retry Failed Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404 or 409', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404, 409]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Has status field', () => {",
+                  "        pm.expect(pm.response.json()).to.have.property('status');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_prefix}}/failed-records/{{last_failed_record_id}}/retry",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "failed-records", "{{last_failed_record_id}}", "retry"]
+            },
+            "description": "Retry a failed record. Runs the original raw payload through transformation again."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mock Provider Verification",
+      "item": [
+        {
+          "name": "Mock CRM - Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mock_url}}/mock/crm/customers",
+              "host": ["{{mock_url}}"],
+              "path": ["mock", "crm", "customers"]
+            },
+            "description": "Direct call to mock CRM — shows raw JSON that the integration transforms."
+          }
+        },
+        {
+          "name": "Mock CRM - Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mock_url}}/mock/crm/orders",
+              "host": ["{{mock_url}}"],
+              "path": ["mock", "crm", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Mock Vendor - Orders XML",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mock_url}}/mock/vendor/orders",
+              "host": ["{{mock_url}}"],
+              "path": ["mock", "vendor", "orders"]
+            },
+            "description": "Direct call to mock Vendor — shows raw XML including the malformed record."
+          }
+        },
+        {
+          "name": "Mock Vendor - Shipments XML",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mock_url}}/mock/vendor/shipments",
+              "host": ["{{mock_url}}"],
+              "path": ["mock", "vendor", "shipments"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
