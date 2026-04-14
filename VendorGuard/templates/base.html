@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VendorGuard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="shield">&#x1F6E1;</span> VendorGuard
+        </div>
+        <nav class="sidebar-nav">
+            <div class="section-label">Overview</div>
+            <a href="/dashboard" {% if request.url.path == '/dashboard' %}class="active"{% endif %}>&#9632; Dashboard</a>
+            <div class="section-label">Assessment</div>
+            <a href="/vendors" {% if '/vendors' in request.url.path and '/new' not in request.url.path %}class="active"{% endif %}>&#9632; Vendors</a>
+            <a href="/findings" {% if request.url.path == '/findings' %}class="active"{% endif %}>&#9632; Findings</a>
+            <a href="/remediation" {% if request.url.path == '/remediation' %}class="active"{% endif %}>&#9632; Remediation</a>
+            <div class="section-label">Governance</div>
+            <a href="/governance" {% if request.url.path == '/governance' %}class="active"{% endif %}>&#9632; Templates &amp; Domains</a>
+        </nav>
+        <div class="sidebar-user">
+            <strong>{{ user.full_name }}</strong>
+            {{ user.role | title }} &middot; <a href="#" onclick="logout()" style="color:rgba(255,255,255,.6)">Logout</a>
+        </div>
+    </aside>
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script src="/static/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

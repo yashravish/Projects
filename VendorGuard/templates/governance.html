@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Governance — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Templates &amp; Governance</h1>
+</div>
+
+<div class="alert alert-info">
+    Assessment templates define the standard questionnaire sections. Control domains map findings
+    to security frameworks inspired by NIST CSF and ISO 27001. These mappings are illustrative
+    and educational — not formal compliance advice.
+</div>
+
+<div class="card">
+    <div class="card-title">Assessment Templates</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Template</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody id="templates-body">
+                <tr><td colspan="4" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Control Domain Reference</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Domain</th>
+                    <th>NIST CSF Mapping</th>
+                    <th>ISO 27001 Mapping</th>
+                </tr>
+            </thead>
+            <tbody id="domains-body">
+                <tr><td colspan="4" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadGovernance();</script>
+{% endblock %}

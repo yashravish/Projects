@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Vendor Detail — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 id="vendor-title">Loading...</h1>
+    <a href="/vendors" class="btn btn-secondary">Back to Vendors</a>
+</div>
+
+<div class="card">
+    <div class="card-title">Vendor Information</div>
+    <div id="vendor-info"><p class="loading">Loading...</p></div>
+</div>
+
+<div class="card">
+    <div class="card-title">Integrations</div>
+    <div id="vendor-integrations"><p class="loading">Loading...</p></div>
+</div>
+
+<div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Assessments</span>
+        <div style="display:flex;gap:8px;align-items:center">
+            <select id="assessment-type" style="width:auto;font-size:12px">
+                <option value="initial">Initial</option>
+                <option value="renewal">Renewal</option>
+                <option value="ad_hoc">Ad Hoc</option>
+            </select>
+            <select id="assessment-phase" style="width:auto;font-size:12px">
+                <option value="pre_implementation">Pre-Implementation</option>
+                <option value="post_implementation">Post-Implementation</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="createAssessment({{ vendor_id }})">Start Assessment</button>
+        </div>
+    </div>
+    <div id="vendor-assessments"><p class="loading">Loading...</p></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadVendorDetail({{ vendor_id }});</script>
+{% endblock %}

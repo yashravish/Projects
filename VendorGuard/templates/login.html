@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorGuard — Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="login-page">
+    <div class="login-box">
+        <h1>&#x1F6E1; VendorGuard</h1>
+        <p class="subtitle">Third-Party Security Assessment Platform</p>
+        <p id="login-error" class="login-error"></p>
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required autofocus placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="admin123">
+            </div>
+            <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+        <p style="margin-top:16px;text-align:center;font-size:11px;color:var(--text-muted)">
+            Demo: admin / admin123 &nbsp;|&nbsp; analyst / analyst123
+        </p>
+    </div>
+</div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

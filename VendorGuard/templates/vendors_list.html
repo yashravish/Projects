@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Vendors — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Registered Vendors</h1>
+    <a href="/vendors/new" class="btn btn-primary">+ Register Vendor</a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Hosting</th>
+                    <th>Sensitive Data</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody id="vendors-body">
+                <tr><td colspan="6" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadVendors();</script>
+{% endblock %}

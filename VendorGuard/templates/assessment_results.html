@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Assessment Results — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Assessment Results</h1>
+    <div style="display:flex;gap:8px">
+        <a href="/reports/{{ assessment_id }}/preview" class="btn btn-secondary">Preview Report</a>
+        <a href="/vendors" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Vendor</div>
+        <div style="font-size:18px;font-weight:600" id="result-vendor">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Assessment</div>
+        <div style="font-size:14px" id="result-type">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Status</div>
+        <div id="result-status">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Findings</div>
+        <div class="stat-value" id="result-findings-count">—</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-title">Inherent Risk</div>
+        <div style="display:flex;align-items:center;gap:16px">
+            <span style="font-size:36px;font-weight:700" id="result-inherent-score">—</span>
+            <span id="result-inherent-rating">—</span>
+        </div>
+        <div class="risk-meter mt-16">
+            <div class="meter-bar"><div class="meter-fill" id="risk-meter-fill" style="width:0%"></div></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-title">Residual Risk</div>
+        <div style="display:flex;align-items:center;gap:16px">
+            <span style="font-size:36px;font-weight:700" id="result-residual-score">—</span>
+            <span id="result-residual-rating">—</span>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Executive Summary</div>
+    <p id="result-summary" style="white-space:pre-wrap">Loading...</p>
+</div>
+
+<div class="card" style="display:none">
+    <div class="card-title">AI-Generated Summary</div>
+    <p id="result-ai-summary" style="white-space:pre-wrap"></p>
+</div>
+
+<div class="card">
+    <div class="card-title">Detailed Findings</div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Finding</th><th>Severity</th><th>Domain</th><th>Status</th><th>Recommendation</th></tr></thead>
+            <tbody id="result-findings-body"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadAssessmentResults({{ assessment_id }});</script>
+{% endblock %}
