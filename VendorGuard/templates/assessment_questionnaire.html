@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Assessment Questionnaire — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Security Assessment: {{ vendor.name }}</h1>
+    <span class="badge badge-{{ vendor.category | lower | replace(' ', '-') }}">{{ vendor.category }}</span>
+</div>
+
+<div class="alert alert-info">
+    Complete all applicable sections below. Category-specific sections are shown based on the vendor type.
+    After submission, the deterministic risk engine will evaluate responses and generate findings.
+</div>
+
+<form id="questionnaire-form" class="card" style="max-width:900px">
+
+{% for sec_key, section in sections.items() %}
+<div class="form-section">
+    <h3>{{ section.title }}</h3>
+    {% for q in section.questions %}
+    <div class="form-group">
+        <label>{{ q.text }}</label>
+        {% if q.type == "boolean" %}
+        <div style="display:flex;gap:16px">
+            <label class="checkbox-row">
+                <input type="radio" name="q_{{ q.key }}" value="true"
+                    data-question-key="{{ q.key }}" data-section="{{ sec_key }}" data-question-text="{{ q.text }}">
+                Yes
+            </label>
+            <label class="checkbox-row">
+                <input type="radio" name="q_{{ q.key }}" value="false"
+                    data-question-key="{{ q.key }}" data-section="{{ sec_key }}" data-question-text="{{ q.text }}" checked>
+                No
+            </label>
+        </div>
+        {% elif q.type == "select" %}
+        <select data-question-key="{{ q.key }}" data-section="{{ sec_key }}" data-question-text="{{ q.text }}">
+            <option value="">Select...</option>
+            {% for opt in q.options %}
+            <option value="{{ opt }}">{{ opt }}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        <input type="text" data-question-key="{{ q.key }}" data-section="{{ sec_key }}" data-question-text="{{ q.text }}">
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+<button type="button" class="btn btn-primary" onclick="submitAssessment({{ assessment_id }})">
+    Submit &amp; Evaluate
+</button>
+</form>
+{% endblock %}

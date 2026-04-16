@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Report Preview — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Assessment Report Preview</h1>
+    <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="generatePDF({{ assessment_id }})">Export PDF</button>
+        <a href="/assessments/{{ assessment_id }}/results" class="btn btn-secondary">Back to Results</a>
+    </div>
+</div>
+
+<iframe id="report-frame" class="report-frame"></iframe>
+{% endblock %}
+
+{% block scripts %}
+<script>loadReportPreview({{ assessment_id }});</script>
+{% endblock %}

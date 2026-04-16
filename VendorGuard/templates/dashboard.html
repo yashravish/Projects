@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Security Dashboard</h1>
+    <a href="/vendors/new" class="btn btn-primary">+ Register Vendor</a>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-value" id="stat-vendors">—</div>
+        <div class="stat-label">Total Vendors</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="stat-assessments">—</div>
+        <div class="stat-label">Active Assessments</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-value" id="stat-critical">—</div>
+        <div class="stat-label">Open Critical Findings</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-value" id="stat-high">—</div>
+        <div class="stat-label">Open High Findings</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value" id="stat-overdue">—</div>
+        <div class="stat-label">Overdue Remediations</div>
+    </div>
+</div>
+
+<div class="grid-3">
+    <div class="card">
+        <div class="card-title">Vendors by Category</div>
+        <div class="bar-chart" id="chart-category"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Open Findings by Severity</div>
+        <div class="bar-chart" id="chart-severity"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Findings by Control Domain</div>
+        <div class="bar-chart" id="chart-domain"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">Recent Activity</div>
+    <div id="recent-activity"><p class="loading">Loading...</p></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadDashboard();</script>
+{% endblock %}

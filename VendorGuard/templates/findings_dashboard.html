@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Findings — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Findings Dashboard</h1>
+    <span style="color:var(--text-muted);font-size:13px"><span id="findings-count">0</span> findings</span>
+</div>
+
+<div class="card">
+    <div class="filters">
+        <select id="filter-severity" onchange="loadFindings()">
+            <option value="">All Severities</option>
+            <option>Critical</option>
+            <option>High</option>
+            <option>Moderate</option>
+            <option>Low</option>
+        </select>
+        <select id="filter-status" onchange="loadFindings()">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="mitigated">Mitigated</option>
+            <option value="accepted_risk">Accepted Risk</option>
+            <option value="closed">Closed</option>
+        </select>
+        <select id="filter-domain" onchange="loadFindings()">
+            <option value="">All Domains</option>
+            <option value="AC">Access Control</option>
+            <option value="DP">Data Protection</option>
+            <option value="AM">Asset Management</option>
+            <option value="VM">Vendor Management</option>
+            <option value="LM">Logging & Monitoring</option>
+            <option value="IR">Incident Response</option>
+            <option value="VU">Vulnerability Management</option>
+            <option value="SC">Secure Configuration</option>
+            <option value="BC">Business Continuity</option>
+            <option value="GD">Governance & Documentation</option>
+            <option value="AG">AI Governance</option>
+            <option value="IOT">IoT Security</option>
+        </select>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Finding</th>
+                    <th>Severity</th>
+                    <th>Domain</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody id="findings-body">
+                <tr><td colspan="6" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadFindings();</script>
+{% endblock %}

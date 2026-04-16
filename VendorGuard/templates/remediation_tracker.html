@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Remediation Tracker — VendorGuard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Remediation Tracker</h1>
+</div>
+
+<div class="card">
+    <div class="filters">
+        <select id="filter-rem-status" onchange="loadRemediation()">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="mitigated">Mitigated</option>
+            <option value="accepted_risk">Accepted Risk</option>
+            <option value="closed">Closed</option>
+        </select>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Finding</th>
+                    <th>Vendor</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="remediation-body">
+                <tr><td colspan="7" class="loading">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>loadRemediation();</script>
+{% endblock %}
