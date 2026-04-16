@@ -5,10 +5,11 @@ LABEL description="Main application service"
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (includes librdkafka for confluent-kafka)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    librdkafka-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

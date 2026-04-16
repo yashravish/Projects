@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     customers,
+    events,
     failed_records,
     health,
     jobs,
@@ -21,3 +22,4 @@ api_router.include_router(shipments.router, prefix="/shipments", tags=["Shipment
 api_router.include_router(sync.router, prefix="/sync", tags=["Sync"])
 api_router.include_router(jobs.router, prefix="/integration-jobs", tags=["Integration Jobs"])
 api_router.include_router(failed_records.router, prefix="/failed-records", tags=["Failed Records"])
+api_router.include_router(events.router, prefix="/events", tags=["Events"])

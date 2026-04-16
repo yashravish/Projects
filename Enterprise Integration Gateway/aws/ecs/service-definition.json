@@ -1,0 +1,44 @@
+{
+  "serviceName": "eig-app-service",
+  "cluster": "eig-cluster",
+  "taskDefinition": "eig-app",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "minimumHealthyPercent": 50,
+    "maximumPercent": 200,
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    }
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "${PRIVATE_SUBNET_1}",
+        "${PRIVATE_SUBNET_2}"
+      ],
+      "securityGroups": [
+        "${APP_SECURITY_GROUP}"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "${ALB_TARGET_GROUP_ARN}",
+      "containerName": "eig-app",
+      "containerPort": 8000
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE",
+  "tags": [
+    { "key": "Project", "value": "enterprise-integration-gateway" },
+    { "key": "Environment", "value": "production" },
+    { "key": "ManagedBy", "value": "ecs" }
+  ]
+}

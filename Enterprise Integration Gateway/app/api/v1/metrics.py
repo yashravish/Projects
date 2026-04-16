@@ -6,11 +6,14 @@ failed record summary, and scheduler state.
 """
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.cache import cached
 from app.core.dependencies import get_db
+from app.core.redis_client import get_redis_status
+from app.core.kafka_client import get_kafka_status
 from app.jobs.scheduler import get_scheduler_status
 from app.models.customer import Customer
 from app.models.failed_record import FailedRecord
@@ -30,6 +33,7 @@ def admin_status(db: Session = Depends(get_db)):
     - latest 5 sync jobs
     - failed record counts by status
     - scheduler state
+    - Redis and Kafka connectivity
     """
     total_customers = db.scalar(select(func.count(Customer.id))) or 0
     total_orders = db.scalar(select(func.count(Order.id))) or 0
@@ -81,11 +85,14 @@ def admin_status(db: Session = Depends(get_db)):
         },
         "recent_sync_jobs": recent_jobs_data,
         "scheduler": get_scheduler_status(),
+        "redis": get_redis_status(),
+        "kafka": get_kafka_status(),
     }
 
 
 @router.get("/metrics", summary="Basic metrics endpoint")
-def metrics(db: Session = Depends(get_db)):
+@cached(prefix="metrics", ttl=30)
+def metrics(request: Request, db: Session = Depends(get_db)):
     """
     Lightweight Prometheus-style text metrics (counts only).
     Suitable for a simple health dashboard scrape.

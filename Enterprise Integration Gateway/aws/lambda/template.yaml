@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Enterprise Integration Gateway — Serverless deployment via AWS Lambda + API Gateway.
+  Wraps the FastAPI application using Mangum for Lambda execution.
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        APP_ENV: production
+        LOG_LEVEL: INFO
+        LOG_FORMAT: json
+        SCHEDULER_ENABLED: "false"
+        REDIS_ENABLED: "true"
+        KAFKA_ENABLED: "false"
+
+Parameters:
+  DatabaseUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /eig/production/DATABASE_URL
+    Description: PostgreSQL connection string from SSM
+
+  RedisUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /eig/production/REDIS_URL
+    Description: Redis connection string from SSM
+
+  CrmBaseUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /eig/production/CRM_BASE_URL
+    Description: CRM API base URL from SSM
+
+  VendorBaseUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /eig/production/VENDOR_BASE_URL
+    Description: Vendor API base URL from SSM
+
+  VpcSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private subnets for Lambda VPC access
+
+  VpcSecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: Security groups for Lambda VPC access
+
+Resources:
+  # ── Lambda Function ──────────────────────────────────────────────────────────
+  EigFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: eig-gateway
+      Handler: aws.lambda.handler.handler
+      CodeUri: ../../
+      Description: Enterprise Integration Gateway API (FastAPI via Mangum)
+      VpcConfig:
+        SubnetIds: !Ref VpcSubnetIds
+        SecurityGroupIds: !Ref VpcSecurityGroupIds
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DatabaseUrl
+          REDIS_URL: !Ref RedisUrl
+          CRM_BASE_URL: !Ref CrmBaseUrl
+          VENDOR_BASE_URL: !Ref VendorBaseUrl
+      Events:
+        ApiGateway:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootPath:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: ANY
+      Policies:
+        - VPCAccessPolicy: {}
+        - SSMParameterReadPolicy:
+            ParameterName: eig/*
+
+  # ── EventBridge Rule — Scheduled CRM Sync ────────────────────────────────────
+  CrmSyncSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: eig-crm-sync-schedule
+      Description: Trigger CRM sync every 15 minutes
+      ScheduleExpression: rate(15 minutes)
+      State: ENABLED
+      Targets:
+        - Id: eig-crm-sync
+          Arn: !GetAtt EigFunction.Arn
+          Input: |
+            {
+              "httpMethod": "POST",
+              "path": "/api/v1/sync/crm",
+              "headers": {"Content-Type": "application/json"},
+              "body": null
+            }
+
+  CrmSyncPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref EigFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt CrmSyncSchedule.Arn
+
+  # ── EventBridge Rule — Scheduled Vendor Sync ─────────────────────────────────
+  VendorSyncSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: eig-vendor-sync-schedule
+      Description: Trigger Vendor sync every 15 minutes
+      ScheduleExpression: rate(15 minutes)
+      State: ENABLED
+      Targets:
+        - Id: eig-vendor-sync
+          Arn: !GetAtt EigFunction.Arn
+          Input: |
+            {
+              "httpMethod": "POST",
+              "path": "/api/v1/sync/vendor",
+              "headers": {"Content-Type": "application/json"},
+              "body": null
+            }
+
+  VendorSyncPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref EigFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt VendorSyncSchedule.Arn
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt EigFunction.Arn

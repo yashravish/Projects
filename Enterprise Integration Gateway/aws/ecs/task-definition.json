@@ -1,0 +1,71 @@
+{
+  "family": "eig-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/eig-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/eig-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "eig-app",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/eig-app:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "APP_ENV", "value": "production" },
+        { "name": "LOG_LEVEL", "value": "INFO" },
+        { "name": "LOG_FORMAT", "value": "json" },
+        { "name": "SCHEDULER_ENABLED", "value": "true" },
+        { "name": "CRM_SYNC_INTERVAL_MINUTES", "value": "15" },
+        { "name": "VENDOR_SYNC_INTERVAL_MINUTES", "value": "15" },
+        { "name": "REDIS_ENABLED", "value": "true" },
+        { "name": "KAFKA_ENABLED", "value": "true" },
+        { "name": "CACHE_TTL_SECONDS", "value": "60" },
+        { "name": "RATE_LIMIT_RPM", "value": "30" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/eig/production/DATABASE_URL"
+        },
+        {
+          "name": "REDIS_URL",
+          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/eig/production/REDIS_URL"
+        },
+        {
+          "name": "KAFKA_BOOTSTRAP_SERVERS",
+          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/eig/production/KAFKA_BOOTSTRAP_SERVERS"
+        },
+        {
+          "name": "CRM_BASE_URL",
+          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/eig/production/CRM_BASE_URL"
+        },
+        {
+          "name": "VENDOR_BASE_URL",
+          "valueFrom": "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/eig/production/VENDOR_BASE_URL"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/eig-app",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "eig"
+        }
+      }
+    }
+  ]
+}

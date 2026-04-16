@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import cached
 from app.core.dependencies import get_db
 from app.core.exceptions import RecordNotFoundError
 from app.schemas.customer import CustomerResponse
@@ -10,7 +11,9 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[CustomerResponse], summary="List customers")
+@cached(prefix="customers")
 def get_customers(
+    request: Request,
     source: str | None = Query(None, description="Filter by source: 'crm' or 'vendor'"),
     status: str | None = Query(None, description="Filter by status: 'active', 'inactive'"),
     skip: int = Query(0, ge=0),
@@ -25,7 +28,8 @@ def get_customers(
 
 
 @router.get("/{customer_id}", response_model=CustomerResponse, summary="Get customer by ID")
-def get_customer(customer_id: int, db: Session = Depends(get_db)):
+@cached(prefix="customers")
+def get_customer(request: Request, customer_id: int, db: Session = Depends(get_db)):
     """Return a single customer by internal ID."""
     customer = get_customer_by_id(db, customer_id)
     if customer is None:

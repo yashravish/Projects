@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import cached
 from app.core.dependencies import get_db
 from app.schemas.shipment import ShipmentResponse
 from app.services.shipment_service import get_shipment_by_id, list_shipments
@@ -9,7 +10,9 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[ShipmentResponse], summary="List shipments")
+@cached(prefix="shipments")
 def get_shipments(
+    request: Request,
     source: str | None = Query(None, description="Filter by source: 'vendor'"),
     status: str | None = Query(None, description="Filter by shipment status"),
     order_id: int | None = Query(None, description="Filter by internal order ID"),
@@ -25,7 +28,8 @@ def get_shipments(
 
 
 @router.get("/{shipment_id}", response_model=ShipmentResponse, summary="Get shipment by ID")
-def get_shipment(shipment_id: int, db: Session = Depends(get_db)):
+@cached(prefix="shipments")
+def get_shipment(request: Request, shipment_id: int, db: Session = Depends(get_db)):
     """Return a single shipment by internal ID."""
     shipment = get_shipment_by_id(db, shipment_id)
     if shipment is None:

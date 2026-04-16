@@ -7,6 +7,7 @@ Responsibilities:
   - Call transformers
   - Call entity services for persistence
   - Track per-record failures in failed_records
+  - Publish Kafka events at key lifecycle points
   - Return a SyncResult summary
 """
 import json
@@ -19,8 +20,10 @@ from app.clients.crm_client import CrmClient
 from app.clients.vendor_client import VendorClient
 from app.core.exceptions import IntegrationError, TransformationError
 from app.models.sync_job import SyncJob
+from app.schemas.events import RecordFailedEvent, SyncCompletedEvent, SyncStartedEvent
 from app.schemas.sync_job import SyncResult
 from app.services.customer_service import upsert_customer
+from app.services.event_publisher import publish_event
 from app.services.failed_record_service import create_failed_record
 from app.services.order_service import upsert_order
 from app.services.shipment_service import upsert_shipment
@@ -54,6 +57,15 @@ def _create_job(db: Session, job_type: str, triggered_by: str) -> SyncJob:
         "sync_job_started",
         extra={"job_id": job.id, "job_type": job_type, "correlation_id": job.correlation_id},
     )
+
+    # ── Publish sync started event ─────────────────────────────────────────
+    publish_event(SyncStartedEvent(
+        job_id=job.id,
+        job_type=job_type,
+        triggered_by=triggered_by,
+        correlation_id=job.correlation_id,
+    ))
+
     return job
 
 
@@ -96,6 +108,19 @@ def _finish_job(
             "failed": failed,
         },
     )
+
+    # ── Publish sync completed event ───────────────────────────────────────
+    publish_event(SyncCompletedEvent(
+        job_id=job.id,
+        job_type=job.job_type,
+        status=status,
+        records_processed=processed,
+        records_inserted=inserted,
+        records_updated=updated,
+        records_failed=failed,
+        correlation_id=job.correlation_id,
+    ))
+
     return job
 
 
@@ -109,7 +134,32 @@ def _fail_job(db: Session, job: SyncJob, error_message: str) -> SyncJob:
         "sync_job_failed",
         extra={"job_id": job.id, "error": error_message},
     )
+
+    # ── Publish sync failed event ──────────────────────────────────────────
+    publish_event(SyncCompletedEvent(
+        job_id=job.id,
+        job_type=job.job_type,
+        status="failed",
+        message=error_message,
+        correlation_id=job.correlation_id,
+    ))
+
     return job
+
+
+def _publish_record_failure(
+    job: SyncJob, source: str, record_type: str,
+    external_id: str | None, error: str,
+) -> None:
+    """Publish a RecordFailedEvent to Kafka (fire-and-forget)."""
+    publish_event(RecordFailedEvent(
+        job_id=job.id,
+        source=source,
+        record_type=record_type,
+        external_id=str(external_id) if external_id else None,
+        error_message=error,
+        correlation_id=job.correlation_id,
+    ))
 
 
 # ── CRM Sync ──────────────────────────────────────────────────────────────────
@@ -160,16 +210,18 @@ def execute_crm_sync(db: Session, triggered_by: str = "api") -> SyncResult:
         except (TransformationError, Exception) as exc:
             failed += 1
             db.rollback()
+            ext_id = raw.get("customerId") or raw.get("id")
             create_failed_record(
                 db,
                 sync_job_id=job.id,
                 source="crm",
                 record_type="customer",
-                external_id=raw.get("customerId") or raw.get("id"),
+                external_id=ext_id,
                 raw_data=json.dumps(raw),
                 error_message=str(exc),
             )
             db.commit()
+            _publish_record_failure(job, "crm", "customer", ext_id, str(exc))
             logger.warning("crm_customer_failed", extra={"error": str(exc)})
 
     # ── Process orders ─────────────────────────────────────────────────────────
@@ -187,16 +239,18 @@ def execute_crm_sync(db: Session, triggered_by: str = "api") -> SyncResult:
         except (TransformationError, Exception) as exc:
             failed += 1
             db.rollback()
+            ext_id = raw.get("orderId") or raw.get("id")
             create_failed_record(
                 db,
                 sync_job_id=job.id,
                 source="crm",
                 record_type="order",
-                external_id=raw.get("orderId") or raw.get("id"),
+                external_id=ext_id,
                 raw_data=json.dumps(raw),
                 error_message=str(exc),
             )
             db.commit()
+            _publish_record_failure(job, "crm", "order", ext_id, str(exc))
             logger.warning("crm_order_failed", extra={"error": str(exc)})
 
     total = len(raw_customers) + len(raw_orders)
@@ -269,6 +323,7 @@ def execute_vendor_sync(db: Session, triggered_by: str = "api") -> SyncResult:
             error_message=record.get("error", "XML parse failure"),
         )
         db.commit()
+        _publish_record_failure(job, "vendor", "order", None, record.get("error", "XML parse failure"))
 
     for parsed in valid_orders:
         try:
@@ -293,6 +348,7 @@ def execute_vendor_sync(db: Session, triggered_by: str = "api") -> SyncResult:
                 error_message=str(exc),
             )
             db.commit()
+            _publish_record_failure(job, "vendor", "order", parsed.get("order_id"), str(exc))
             logger.warning("vendor_order_failed", extra={"error": str(exc)})
 
     # ── Process vendor shipments ──────────────────────────────────────────────
@@ -310,6 +366,7 @@ def execute_vendor_sync(db: Session, triggered_by: str = "api") -> SyncResult:
             error_message=record.get("error", "XML parse failure"),
         )
         db.commit()
+        _publish_record_failure(job, "vendor", "shipment", None, record.get("error", "XML parse failure"))
 
     for parsed in valid_shipments:
         try:
@@ -335,6 +392,7 @@ def execute_vendor_sync(db: Session, triggered_by: str = "api") -> SyncResult:
                 error_message=str(exc),
             )
             db.commit()
+            _publish_record_failure(job, "vendor", "shipment", parsed.get("shipment_id"), str(exc))
             logger.warning("vendor_shipment_failed", extra={"error": str(exc)})
 
     total = len(valid_orders) + len(malformed_orders) + len(valid_shipments) + len(malformed_shipments)

@@ -1,0 +1,52 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+    ECR_REPOSITORY: eig-app
+    IMAGE_TAG: latest
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:-latest}
+      - echo "Running tests..."
+      - pip install -r requirements-dev.txt
+      - |
+        DATABASE_URL=sqlite:///:memory: \
+        CRM_BASE_URL=http://localhost:8001 \
+        VENDOR_BASE_URL=http://localhost:8001 \
+        SCHEDULER_ENABLED=false \
+        REDIS_ENABLED=false \
+        KAFKA_ENABLED=false \
+        LOG_FORMAT=text \
+        LOG_LEVEL=WARNING \
+        pytest tests/ -v --tb=short
+
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo "Writing image definitions for ECS deploy..."
+      - printf '[{"name":"eig-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - aws/ecs/appspec.yml
+    - aws/ecs/task-definition.json
+
+cache:
+  paths:
+    - "/root/.cache/pip/**/*"

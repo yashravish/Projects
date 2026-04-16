@@ -15,6 +15,8 @@ os.environ.setdefault("LOG_FORMAT", "text")
 os.environ.setdefault("LOG_LEVEL", "WARNING")
 os.environ.setdefault("CRM_BASE_URL", "http://localhost:8001")
 os.environ.setdefault("VENDOR_BASE_URL", "http://localhost:8001")
+os.environ.setdefault("REDIS_ENABLED", "false")
+os.environ.setdefault("KAFKA_ENABLED", "false")
 
 import pytest
 from fastapi.testclient import TestClient

@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # ── Application ────────────────────────────────────────────────────────────
     APP_NAME: str = "Enterprise Integration Gateway"
-    APP_VERSION: str = "1.0.0"
+    APP_VERSION: str = "2.0.0"
     APP_ENV: str = "development"
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
@@ -44,6 +44,19 @@ class Settings(BaseSettings):
 
     # ── CORS ───────────────────────────────────────────────────────────────────
     ALLOWED_ORIGINS: str = "*"
+
+    # ── Redis ──────────────────────────────────────────────────────────────────
+    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_ENABLED: bool = True
+    CACHE_TTL_SECONDS: int = 60
+    RATE_LIMIT_RPM: int = 30
+
+    # ── Kafka ──────────────────────────────────────────────────────────────────
+    KAFKA_ENABLED: bool = True
+    KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
+    KAFKA_EVENTS_TOPIC: str = "eig.integration.events"
+    KAFKA_INBOUND_TOPIC: str = "eig.inbound.sync.requests"
+    KAFKA_CONSUMER_GROUP: str = "eig-gateway-group"
 
     def get_allowed_origins(self) -> List[str]:
         if self.ALLOWED_ORIGINS == "*":

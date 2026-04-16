@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import cached
 from app.core.dependencies import get_db
 from app.schemas.order import OrderResponse
 from app.services.order_service import get_order_by_id, list_orders
@@ -9,7 +10,9 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[OrderResponse], summary="List orders")
+@cached(prefix="orders")
 def get_orders(
+    request: Request,
     source: str | None = Query(None, description="Filter by source: 'crm' or 'vendor'"),
     status: str | None = Query(None, description="Filter by order status"),
     customer_id: int | None = Query(None, description="Filter by internal customer ID"),
@@ -25,7 +28,8 @@ def get_orders(
 
 
 @router.get("/{order_id}", response_model=OrderResponse, summary="Get order by ID")
-def get_order(order_id: int, db: Session = Depends(get_db)):
+@cached(prefix="orders")
+def get_order(request: Request, order_id: int, db: Session = Depends(get_db)):
     """Return a single order by internal ID."""
     order = get_order_by_id(db, order_id)
     if order is None:

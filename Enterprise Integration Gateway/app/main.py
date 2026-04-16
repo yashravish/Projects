@@ -4,6 +4,8 @@ Enterprise Integration Gateway — main application entry point.
 Wires together:
   - FastAPI app with versioned router
   - Database initialization on startup
+  - Redis connection pool for caching and rate limiting
+  - Kafka producer/consumer for event-driven integration
   - APScheduler background sync jobs
   - Request-ID middleware
   - CORS middleware
@@ -23,8 +25,11 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.exceptions import IntegrationError
 from app.core.logging_config import setup_logging
+from app.core.redis_client import init_redis, shutdown_redis
+from app.core.kafka_client import init_kafka_producer, shutdown_kafka
 from app.db.init_db import init_db
 from app.jobs.scheduler import shutdown_scheduler, start_scheduler
+from app.jobs.event_consumer import start_event_consumer, stop_event_consumer
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -38,8 +43,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         extra={"app_name": settings.APP_NAME, "version": settings.APP_VERSION, "env": settings.APP_ENV},
     )
     init_db()
+    init_redis()
+    init_kafka_producer()
     if settings.SCHEDULER_ENABLED:
         start_scheduler()
+    if settings.KAFKA_ENABLED:
+        start_event_consumer()
     logger.info("application_ready")
 
     yield
@@ -47,6 +56,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("application_shutting_down")
     if settings.SCHEDULER_ENABLED:
         shutdown_scheduler()
+    stop_event_consumer()
+    shutdown_kafka()
+    shutdown_redis()
 
 
 app = FastAPI(
@@ -55,7 +67,8 @@ app = FastAPI(
     description=(
         "Enterprise Integration Gateway — REST API for cross-system data synchronization.\n\n"
         "Integrates a mock CRM (JSON) and a mock Vendor (XML) feed into a unified "
-        "normalized PostgreSQL datastore with full job tracking and retry support."
+        "normalized PostgreSQL datastore with full job tracking, retry support, "
+        "Redis caching, Kafka event streaming, and AWS deployment support."
     ),
     docs_url="/docs",
     redoc_url="/redoc",

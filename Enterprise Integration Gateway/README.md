@@ -1,8 +1,8 @@
 # Enterprise Integration Gateway
 
-A production-quality integration platform that syncs customer, order, and shipment data between a mock CRM (JSON), a mock Vendor EDI feed (XML), and a normalized PostgreSQL datastore — with full job tracking, dead-letter retry, admin monitoring, and a unified REST API.
+A production-quality integration platform that syncs customer, order, and shipment data between a mock CRM (JSON), a mock Vendor EDI feed (XML), and a normalized PostgreSQL datastore — with Redis caching, Kafka event streaming, rate limiting, full job tracking, dead-letter retry, admin monitoring, a unified REST API, and AWS deployment support.
 
-**Built to demonstrate entry-level enterprise integration engineering skills**: REST API integration, JSON + XML data exchange, ETL pipelines, system-to-system automation, SQL design, monitoring, error handling, and testing.
+**Built to demonstrate enterprise integration engineering skills**: REST API integration, JSON + XML data exchange, ETL pipelines, Redis caching & rate limiting, Kafka event-driven architecture, system-to-system automation, SQL design, monitoring, error handling, cloud deployment (AWS ECS/Lambda), and testing.
 
 ---
 
@@ -22,6 +22,8 @@ docker compose up --build
 | Health Check | http://localhost:8000/api/v1/health |
 | Admin Status | http://localhost:8000/api/v1/admin/status |
 | Mock Providers (CRM + Vendor) | http://localhost:8001/docs |
+| Redis | localhost:6379 |
+| Kafka | localhost:9092 |
 
 ### Seed the database
 
@@ -35,17 +37,24 @@ curl -s -X POST http://localhost:8000/api/v1/sync/all | python -m json.tool
 ## Architecture
 
 ```
-Mock CRM (JSON, port 8001) ──────────┐
-                                     ▼
-Mock Vendor (XML, port 8001) ──► Integration Gateway (port 8000) ──► PostgreSQL
-                                     │
+                              ┌───────────────┐
+                              │    Redis      │
+                              │ (Cache + Rate │
+Mock CRM (JSON, port 8001) ─┐ │   Limiting)   │
+                             ▼ └───────┬───────┘
+                    Integration Gateway (port 8000) ──► PostgreSQL
+                             ▲         │
+Mock Vendor (XML, port 8001)─┘         ├──► Kafka (Event Stream)
+                                       │
                               APScheduler (15-min auto-sync)
 ```
 
-Three Docker containers:
+Five Docker containers:
 1. **`db`** — PostgreSQL 16
-2. **`mock_providers`** — Simulated CRM (JSON) + Vendor (XML) on port 8001
-3. **`app`** — FastAPI integration gateway on port 8000
+2. **`redis`** — Redis 7 (response caching + rate limiting)
+3. **`kafka`** — Confluent Kafka 7.6 with KRaft (event streaming)
+4. **`mock_providers`** — Simulated CRM (JSON) + Vendor (XML) on port 8001
+5. **`app`** — FastAPI integration gateway on port 8000
 
 See [`docs/architecture.md`](docs/architecture.md) for the full diagram and component breakdown.
 
@@ -55,7 +64,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full diagram and comp
 
 ### Integration Flows
 | Flow | Trigger | Source Format |
-|------|---------|--------------|
+|------|---------|--------------| 
 | CRM Sync | `POST /sync/crm` or scheduled | JSON (camelCase) |
 | Vendor Sync | `POST /sync/vendor` or scheduled | XML (PascalCase) |
 | Full Sync | `POST /sync/all` | Both |
@@ -66,6 +75,25 @@ See [`docs/architecture.md`](docs/architecture.md) for the full diagram and comp
 3. **Upsert** into PostgreSQL (idempotent — safe to re-run)
 4. Log counts: inserted / updated / failed per record
 5. Capture failed records into `failed_records` dead-letter table
+6. Publish Kafka events at each lifecycle stage
+
+### Redis Caching
+- Response caching on all GET endpoints (customers, orders, shipments, metrics)
+- Configurable TTL (default: 60s) via `CACHE_TTL_SECONDS`
+- Automatic cache invalidation after sync operations
+- Graceful degradation — app works normally if Redis is unavailable
+
+### Rate Limiting
+- Sliding-window rate limiter on `POST /sync/*` endpoints
+- Configurable RPM (default: 30) via `RATE_LIMIT_RPM`
+- Returns `429 Too Many Requests` with `Retry-After` header
+- Per-IP, per-endpoint isolation
+
+### Kafka Event Streaming
+- **Producer**: publishes `sync.started`, `sync.completed`, `record.failed` events
+- **Consumer**: listens on `eig.inbound.sync.requests` for async sync triggers
+- Events include `correlation_id` for distributed tracing
+- Graceful degradation — sync operations continue if Kafka is unavailable
 
 ### Error Handling
 - Malformed XML records → captured in `failed_records`, sync continues
@@ -74,10 +102,11 @@ See [`docs/architecture.md`](docs/architecture.md) for the full diagram and comp
 - Records abandoned after `MAX_RETRY_COUNT` failures
 
 ### Monitoring
-- `GET /health` — service + database connectivity
-- `GET /metrics` — record counts
-- `GET /admin/status` — full dashboard (counts, recent jobs, scheduler state)
+- `GET /health` — service + database + Redis + Kafka connectivity
+- `GET /metrics` — record counts (cached)
+- `GET /admin/status` — full dashboard (counts, recent jobs, scheduler, Redis, Kafka)
 - `GET /integration-jobs` — full sync history with timestamps and counts
+- `GET /events/status` — Kafka producer and topic status
 - Structured JSON logs with `correlation_id` per sync job
 
 ---
@@ -88,36 +117,38 @@ Full documentation: [`docs/api-reference.md`](docs/api-reference.md)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/health` | Health check |
-| GET | `/api/v1/metrics` | Record counts |
+| GET | `/api/v1/health` | Health check (DB + Redis + Kafka) |
+| GET | `/api/v1/metrics` | Record counts (cached) |
 | GET | `/api/v1/admin/status` | Full operational dashboard |
-| POST | `/api/v1/sync/crm` | Trigger CRM sync |
-| POST | `/api/v1/sync/vendor` | Trigger Vendor sync |
-| POST | `/api/v1/sync/all` | Trigger full sync |
-| GET | `/api/v1/customers` | List customers |
-| GET | `/api/v1/customers/{id}` | Get customer |
-| GET | `/api/v1/orders` | List orders |
-| GET | `/api/v1/orders/{id}` | Get order |
-| GET | `/api/v1/shipments` | List shipments |
-| GET | `/api/v1/shipments/{id}` | Get shipment |
+| POST | `/api/v1/sync/crm` | Trigger CRM sync (rate limited) |
+| POST | `/api/v1/sync/vendor` | Trigger Vendor sync (rate limited) |
+| POST | `/api/v1/sync/all` | Trigger full sync (rate limited) |
+| GET | `/api/v1/customers` | List customers (cached) |
+| GET | `/api/v1/customers/{id}` | Get customer (cached) |
+| GET | `/api/v1/orders` | List orders (cached) |
+| GET | `/api/v1/orders/{id}` | Get order (cached) |
+| GET | `/api/v1/shipments` | List shipments (cached) |
+| GET | `/api/v1/shipments/{id}` | Get shipment (cached) |
 | GET | `/api/v1/integration-jobs` | List sync jobs |
 | GET | `/api/v1/integration-jobs/{id}` | Get sync job |
 | GET | `/api/v1/failed-records` | List failed records |
 | POST | `/api/v1/failed-records/{id}/retry` | Retry a failed record |
+| POST | `/api/v1/events/publish` | Publish sync request to Kafka |
+| GET | `/api/v1/events/status` | Kafka event system status |
 
 ### Sample `curl` Commands
 
 ```bash
-# Health check
+# Health check (includes Redis + Kafka status)
 curl http://localhost:8000/api/v1/health
 
-# Trigger CRM sync
+# Trigger CRM sync (rate limited)
 curl -X POST http://localhost:8000/api/v1/sync/crm
 
 # Trigger Vendor sync (will show 1 malformed record)
 curl -X POST http://localhost:8000/api/v1/sync/vendor
 
-# List customers (CRM source only)
+# List customers (cached — second call served from Redis)
 curl "http://localhost:8000/api/v1/customers?source=crm"
 
 # View last 5 sync jobs
@@ -129,8 +160,14 @@ curl http://localhost:8000/api/v1/failed-records
 # Retry a failed record (replace 1 with actual ID)
 curl -X POST http://localhost:8000/api/v1/failed-records/1/retry
 
-# Admin status dashboard
+# Admin status dashboard (includes Redis/Kafka status)
 curl http://localhost:8000/api/v1/admin/status
+
+# Kafka event system status
+curl http://localhost:8000/api/v1/events/status
+
+# Publish a sync request event to Kafka
+curl -X POST "http://localhost:8000/api/v1/events/publish?sync_type=crm&requested_by=demo"
 ```
 
 ---
@@ -152,6 +189,7 @@ curl http://localhost:8000/api/v1/admin/status
 6. `GET /shipments` — view shipments from vendor
 7. `GET /integration-jobs` — view job history
 8. `GET /admin/status` — operational dashboard
+9. `GET /events/status` — verify Kafka connectivity
 
 ### Failure + Retry Flow
 1. `POST /sync/vendor` — creates a malformed failed record
@@ -171,7 +209,7 @@ pip install -r requirements-dev.txt
 pytest tests/ -v
 
 # Run specific test category
-pytest tests/unit/ -v          # Pure transformation/parsing logic
+pytest tests/unit/ -v          # Pure transformation/parsing + cache + rate limiter + events
 pytest tests/api/ -v           # HTTP endpoint tests
 pytest tests/integration/ -v   # Full sync flow tests
 
@@ -179,7 +217,7 @@ pytest tests/integration/ -v   # Full sync flow tests
 pytest tests/ --cov=app --cov-report=term-missing
 ```
 
-Tests use SQLite in memory — no running PostgreSQL required.
+Tests use SQLite in memory — no running PostgreSQL, Redis, or Kafka required. Redis tests use `fakeredis`, Kafka tests mock the producer.
 
 ---
 
@@ -195,18 +233,21 @@ docker run -d \
   -p 5432:5432 \
   postgres:16-alpine
 
-# 2. Install dependencies
+# 2. Start Redis (optional — app works without it)
+docker run -d --name eig_redis -p 6379:6379 redis:7-alpine
+
+# 3. Install dependencies
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-# 3. Configure environment
+# 4. Configure environment
 cp .env.example .env
 
-# 4. Start mock providers (Terminal 1)
+# 5. Start mock providers (Terminal 1)
 uvicorn mock_providers.main:app --host 0.0.0.0 --port 8001 --reload
 
-# 5. Start main app (Terminal 2)
+# 6. Start main app (Terminal 2)
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -216,7 +257,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DATABASE_URL` | `postgresql://eig_user:eig_password@localhost:5432/eig_db` | PostgreSQL connection string |
+| `DATABASE_URL` | `postgresql://...@localhost:5432/eig_db` | PostgreSQL connection string |
 | `CRM_BASE_URL` | `http://localhost:8001` | Base URL for mock CRM API |
 | `VENDOR_BASE_URL` | `http://localhost:8001` | Base URL for mock Vendor API |
 | `SCHEDULER_ENABLED` | `true` | Enable/disable background sync |
@@ -227,6 +268,15 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 | `LOG_FORMAT` | `json` | `json` (structured) or `text` (human-readable) |
 | `HTTP_TIMEOUT_SECONDS` | `30` | Timeout for outbound HTTP calls |
 | `HTTP_MAX_RETRIES` | `3` | Max HTTP retry attempts |
+| `REDIS_URL` | `redis://localhost:6379/0` | Redis connection string |
+| `REDIS_ENABLED` | `true` | Enable/disable Redis caching + rate limiting |
+| `CACHE_TTL_SECONDS` | `60` | Response cache TTL |
+| `RATE_LIMIT_RPM` | `30` | Max sync requests per minute per IP |
+| `KAFKA_ENABLED` | `true` | Enable/disable Kafka event streaming |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker addresses |
+| `KAFKA_EVENTS_TOPIC` | `eig.integration.events` | Topic for outbound events |
+| `KAFKA_INBOUND_TOPIC` | `eig.inbound.sync.requests` | Topic for inbound sync requests |
+| `KAFKA_CONSUMER_GROUP` | `eig-gateway-group` | Kafka consumer group ID |
 
 See `.env.example` for the full list.
 
@@ -239,30 +289,50 @@ enterprise-integration-gateway/
 ├── app/
 │   ├── main.py                  # FastAPI app, middleware, lifespan
 │   ├── core/                    # Config, logging, exceptions, dependencies
+│   │   ├── config.py            # Pydantic settings (DB, Redis, Kafka)
+│   │   ├── redis_client.py      # Redis connection pool + dependency
+│   │   ├── cache.py             # @cached decorator + invalidation
+│   │   ├── rate_limiter.py      # Sliding-window rate limiter
+│   │   └── kafka_client.py      # Kafka producer/consumer wrappers
 │   ├── db/                      # SQLAlchemy engine, session, init
 │   ├── models/                  # SQLAlchemy ORM models
 │   ├── schemas/                 # Pydantic request/response schemas
+│   │   └── events.py            # Kafka event schemas
 │   ├── api/v1/                  # FastAPI route handlers
+│   │   └── events.py            # Kafka event endpoints
 │   ├── services/                # Business logic: sync, upsert, retry
+│   │   └── event_publisher.py   # Kafka event publishing service
 │   ├── clients/                 # HTTP clients (CRM, Vendor) with retry
 │   ├── utils/                   # Transformers, XML/JSON parsers, retry
-│   └── jobs/                    # APScheduler jobs
+│   └── jobs/                    # APScheduler jobs + Kafka consumer
+│       └── event_consumer.py    # Inbound sync request consumer
+├── aws/
+│   ├── ecs/                     # ECS Fargate deployment manifests
+│   │   ├── task-definition.json
+│   │   ├── service-definition.json
+│   │   └── appspec.yml
+│   ├── lambda/                  # Lambda + API Gateway deployment
+│   │   ├── handler.py           # Mangum handler
+│   │   └── template.yaml        # SAM template
+│   ├── cloudformation/
+│   │   └── infrastructure.yaml  # Full AWS infrastructure stack
+│   └── buildspec.yml            # CodeBuild CI/CD spec
 ├── mock_providers/
 │   ├── main.py                  # Mock provider FastAPI app (port 8001)
 │   ├── crm/                     # Mock CRM: JSON customers + orders
 │   └── vendor/                  # Mock Vendor: XML orders + shipments
 ├── alembic/                     # Database migrations
 ├── tests/
-│   ├── unit/                    # Transformer + parser unit tests
+│   ├── unit/                    # Transformer, parser, cache, rate limiter, events
 │   ├── api/                     # Endpoint tests (TestClient + SQLite)
 │   └── integration/             # Full sync flow tests (mocked HTTP)
 ├── postman/                     # Collection + environment JSON
-├── docs/                        # Architecture, ERD, runbook, security
+├── docs/                        # Architecture, ERD, runbook, security, AWS
 ├── scripts/                     # health_check.sh, seed_db.sh
 ├── .github/workflows/ci.yml     # GitHub Actions CI
 ├── Dockerfile                   # Main app container
 ├── Dockerfile.mock              # Mock providers container
-├── docker-compose.yml
+├── docker-compose.yml           # 5-service local environment
 ├── requirements.txt
 └── .env.example
 ```
@@ -274,7 +344,7 @@ enterprise-integration-gateway/
 Five tables — see [`docs/erd.md`](docs/erd.md) for the full ERD.
 
 | Table | Purpose |
-|-------|---------|
+|-------|---------| 
 | `customers` | Normalized customer records from CRM and Vendor |
 | `orders` | Normalized orders from CRM (JSON) and Vendor (XML) |
 | `shipments` | Shipment tracking data from Vendor XML feed |
@@ -288,22 +358,25 @@ Five tables — see [`docs/erd.md`](docs/erd.md) for the full ERD.
 | Document | Description |
 |----------|-------------|
 | [`docs/architecture.md`](docs/architecture.md) | System diagram, component responsibilities |
-| [`docs/data-flow.md`](docs/data-flow.md) | Sequence diagrams for all sync flows |
+| [`docs/data-flow.md`](docs/data-flow.md) | Sequence diagrams for all sync/event flows |
 | [`docs/erd.md`](docs/erd.md) | Entity relationship diagram |
 | [`docs/api-reference.md`](docs/api-reference.md) | Full endpoint documentation |
 | [`docs/runbook.md`](docs/runbook.md) | Operations guide, troubleshooting |
 | [`docs/security.md`](docs/security.md) | Security considerations and SDLC practices |
 | [`docs/sprint-backlog.md`](docs/sprint-backlog.md) | Simulated agile sprint history |
+| [`docs/aws-deployment.md`](docs/aws-deployment.md) | AWS ECS/Lambda deployment guide |
 
 ---
 
 ## Assumptions & Trade-offs
 
 - **Mock providers as internal service**: In production, these would be real external systems. Keeping them internal makes the project fully self-contained for local demo.
-- **APScheduler over Celery**: Simpler setup without requiring Redis/RabbitMQ. Celery would be preferred for high-throughput production workloads.
+- **APScheduler over Celery**: Simpler setup without requiring Redis/RabbitMQ as a task broker. Celery would be preferred for high-throughput production workloads.
 - **Sync over push**: Polling-based sync rather than webhook/event-driven. Suitable for batch integration; real-time would use webhooks or message queues.
 - **SQLite for tests**: Avoids test database infrastructure. Uses `create_all()` instead of Alembic in test context.
-- **No authentication on sync endpoints**: Out of scope for v1. Production would require API keys or JWT.
+- **No authentication on sync endpoints**: Out of scope for v2. Production would require API keys or JWT.
+- **Kafka KRaft mode**: Uses Kafka without Zookeeper for simpler Docker Compose setup.
+- **Graceful degradation**: Redis and Kafka are optional — the app runs fully without them.
 
 ---
 
@@ -319,10 +392,16 @@ Five tables — see [`docs/erd.md`](docs/erd.md) for the full ERD.
 | SQL / database design | Normalized schema, FK relationships, indexes |
 | Error handling / troubleshooting | Failed records, retry logic, structured logging |
 | Monitoring | Health check, admin dashboard, sync job history |
-| Testing | Unit, API, and integration tests |
-| Docker / DevOps | Docker Compose, multi-container setup |
-| CI/CD | GitHub Actions workflow |
-| Documentation | Architecture, ERD, runbook, API reference |
+| Caching & performance | Redis response caching with TTL invalidation |
+| Rate limiting | Sliding-window rate limiter on write endpoints |
+| Event-driven architecture | Kafka producer/consumer, event schemas |
+| Message queues | Kafka async event ingestion + inbound processing |
+| Cloud deployment (AWS) | ECS Fargate, Lambda, CloudFormation, CodeBuild |
+| Infrastructure as Code | CloudFormation (VPC, RDS, Redis, MSK, ALB) |
+| Testing | Unit, API, integration tests + Redis/Kafka tests |
+| Docker / DevOps | Docker Compose (5 services), multi-container setup |
+| CI/CD | GitHub Actions + AWS CodeBuild pipeline |
+| Documentation | Architecture, ERD, runbook, API reference, AWS guide |
 | Agile practices | Sprint backlog, CHANGELOG, modular structure |
 
 ---
@@ -332,23 +411,30 @@ Five tables — see [`docs/erd.md`](docs/erd.md) for the full ERD.
 ```
 • Built an Enterprise Integration Gateway in Python/FastAPI that synchronizes customer,
   order, and shipment data between a JSON CRM API and an XML vendor EDI feed into a
-  normalized PostgreSQL database via scheduled ETL pipelines.
+  normalized PostgreSQL database via scheduled ETL pipelines with Redis caching and
+  Kafka event streaming.
+
+• Implemented Redis-backed response caching (@cached decorator with TTL invalidation)
+  and a sliding-window rate limiter using Redis sorted sets to enforce per-IP request
+  limits on sync trigger endpoints with 429 + Retry-After responses.
+
+• Designed a Kafka event-driven layer publishing sync lifecycle events (started,
+  completed, record.failed) to a topic and consuming inbound sync requests for
+  asynchronous job triggering via confluent-kafka.
 
 • Designed a 5-table PostgreSQL schema with upsert-based ETL supporting idempotent
   sync runs, a dead-letter queue for failed records with retry logic, and full sync
   job audit history.
 
-• Implemented safe XML parsing with malformed-record capture and JSON transformation
-  pipelines, converting camelCase CRM fields and PascalCase XML tags into a unified
-  internal schema using Pydantic v2 validators.
+• Built production-ready AWS deployment manifests: ECS Fargate task/service definitions,
+  Lambda handler via Mangum with SAM template, and a full CloudFormation infrastructure
+  stack (VPC, RDS, ElastiCache, MSK, ALB) with CodeBuild CI/CD pipeline.
 
-• Built a REST API with 15+ endpoints exposing integrated data, sync triggers, job
-  history, failed-record management, and operational health/metrics dashboards.
+• Achieved 85%+ test coverage with pytest unit tests (transformers, cache, rate limiter,
+  event publisher), API tests, and integration tests — using SQLite and fakeredis for
+  zero-infrastructure test execution.
 
-• Achieved 85%+ test coverage with pytest unit tests (transformers, XML/JSON parsers),
-  API tests (FastAPI TestClient + SQLite), and integration tests (monkeypatched HTTP
-  clients) — all running without external dependencies.
-
-• Containerized the entire platform with Docker Compose (3 services) and configured
-  a GitHub Actions CI pipeline running the full test suite on every commit.
+• Containerized the platform with Docker Compose (5 services: PostgreSQL, Redis, Kafka,
+  mock providers, app) and configured GitHub Actions CI running the full test suite on
+  every commit.
 ```

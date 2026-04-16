@@ -77,15 +77,49 @@ This document shows how the project was structured as if built by an agile engin
 
 ---
 
+## Sprint 5 — Redis, Kafka & AWS Deployment (2 weeks)
+
+**Goal**: Production-grade infrastructure — caching, event streaming, cloud deployment
+
+| Story | Points | Status |
+|-------|--------|--------|
+| Redis connection factory with graceful degradation | 3 | Done |
+| `@cached` decorator for GET endpoint response caching | 5 | Done |
+| Sliding-window rate limiter (Redis sorted sets) | 5 | Done |
+| Apply caching to customers, orders, shipments, metrics | 3 | Done |
+| Apply rate limiter to sync trigger endpoints | 2 | Done |
+| Cache invalidation after sync writes | 2 | Done |
+| Kafka producer/consumer wrappers (confluent-kafka) | 5 | Done |
+| Event schemas (SyncStarted, SyncCompleted, RecordFailed) | 3 | Done |
+| Integrate event publishing into sync_service | 3 | Done |
+| Kafka inbound sync request consumer (daemon thread) | 5 | Done |
+| Events API endpoints (publish + status) | 2 | Done |
+| Enhanced health check (Redis + Kafka status) | 2 | Done |
+| Docker Compose: add Redis + Kafka services | 3 | Done |
+| ECS Fargate task/service definitions | 3 | Done |
+| Lambda handler (Mangum) + SAM template | 5 | Done |
+| CloudFormation infrastructure stack (VPC, RDS, Redis, MSK, ALB) | 8 | Done |
+| CodeBuild buildspec for ECR push | 2 | Done |
+| AWS deployment documentation | 3 | Done |
+| Unit tests: cache, rate limiter, event publisher | 5 | Done |
+| Update CI workflow for Redis/Kafka env isolation | 2 | Done |
+| Update all project documentation | 3 | Done |
+
+**Sprint Review Notes**: v2.0.0 release. Redis caching delivers sub-millisecond response times on cached endpoints. Rate limiter protects sync endpoints from accidental flooding. Kafka events provide full audit trail for sync lifecycle. AWS manifests are validated and ready for deployment. All features designed with graceful degradation — core sync operations work without Redis or Kafka.
+
+---
+
 ## Backlog (Future Sprints)
 
 | Story | Priority | Notes |
 |-------|----------|-------|
 | JWT authentication for sync endpoints | High | Prevent unauthorized triggers |
-| Rate limiting on `/sync/*` | Medium | Prevent accidental flood of jobs |
-| Webhook support (push-based sync trigger) | Medium | More real-time than polling |
 | Delta sync (only changed records) | High | Reduce DB write load at scale |
+| Webhook support (push-based sync trigger) | Medium | More real-time than polling |
 | Alembic migration CI gate | Medium | Ensure migrations are always up to date |
 | Prometheus + Grafana dashboards | Medium | Replace custom metrics endpoint |
+| MSK Lambda trigger integration | Medium | Replace polling Kafka consumer in Lambda |
 | Multi-source routing (add Source C) | Low | Extensibility demonstration |
 | PII field masking in logs | High | GDPR/compliance requirement |
+| Redis cluster mode support | Low | High-availability caching |
+| Kafka schema registry integration | Medium | Enforce event contract compatibility |

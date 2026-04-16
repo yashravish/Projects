@@ -1,0 +1,24 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: "eig-app"
+          ContainerPort: 8000
+        PlatformVersion: "LATEST"
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            Subnets:
+              - "${PRIVATE_SUBNET_1}"
+              - "${PRIVATE_SUBNET_2}"
+            SecurityGroups:
+              - "${APP_SECURITY_GROUP}"
+            AssignPublicIp: "DISABLED"
+Hooks:
+  - BeforeInstall: "LambdaFunctionToValidateBeforeInstall"
+  - AfterInstall: "LambdaFunctionToValidateAfterInstall"
+  - AfterAllowTestTraffic: "LambdaFunctionToValidateAfterTestTraffic"
+  - BeforeAllowTraffic: "LambdaFunctionToValidateBeforeAllowTraffic"
+  - AfterAllowTraffic: "LambdaFunctionToValidateAfterAllowTraffic"
