@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: execsim
+      POSTGRES_PASSWORD: execsim
+      POSTGRES_DB: execsim
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U execsim"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://execsim:execsim@db:5432/execsim
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn execsim.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+
+volumes:
+  pgdata:

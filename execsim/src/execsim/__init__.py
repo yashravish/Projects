@@ -1,0 +1,3 @@
+"""execsim - Execution Simulator & Auction Optimizer."""
+
+__version__ = "0.1.0"
