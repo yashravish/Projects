@@ -4,6 +4,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 package-lock.json
+# Track lockfile for DevFlow (CI uses npm ci)
+!DevFlow/frontend/package-lock.json
 .pnpm-debug.log*
 .parcel-cache/
 .cache/
