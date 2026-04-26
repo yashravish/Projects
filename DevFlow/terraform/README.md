@@ -1,0 +1,1 @@
+Sample Terraform (Google provider) for **Artifact Registry**, **Cloud SQL (Postgres)**, and a placeholder **OpenAI** secret. Adjust IAM, costs, and Cloud Run + Secret wiring before production. Run with `TF_VAR_db_password=...` and `TF_VAR_project_id=...`.

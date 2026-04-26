@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply text-slate-200;
+}
+
+@layer components {
+  .df-card {
+    @apply rounded-2xl border border-slate-800/80 bg-surface-800/50 p-4 shadow-lg shadow-slate-950/40;
+  }
+  .df-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-brand-500/50 hover:bg-slate-800;
+  }
+  .df-btn-primary {
+    @apply border-brand-500/50 bg-gradient-to-r from-brand-600 to-indigo-600 shadow-md shadow-indigo-900/40;
+  }
+  .df-h1 {
+    @apply text-2xl font-semibold tracking-tight text-white;
+  }
+}

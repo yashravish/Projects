@@ -1,0 +1,8 @@
+# Example Prometheus config for local Docker (optional; enable in docker-compose).
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: devflow
+    static_configs:
+      - targets: ["host.docker.internal:8000"] # Windows/Mac host; use `backend:8000` in compose

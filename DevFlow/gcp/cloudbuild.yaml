@@ -1,0 +1,31 @@
+# Cloud Build: build & push images, deploy Cloud Run.
+# Set substitutions for your project/region, e.g.:
+#  _AR_REPO, _REGION, _SERVICE, _DB_URL, _SECRETS
+substitutions:
+  _AR_REPO: "devflow"
+  _REGION: "us-central1"
+  _SERVICE: "devflow-api"
+  _IMG_TAG: "latest"
+  _REPO: "${PROJECT_ID}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/devflow-api"
+options:
+  logging: CLOUD_LOGGING_ONLY
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_REPO}:${_IMG_TAG}", "-f", "backend/Dockerfile", "backend/"]
+  - name: gcr.io/cloud-builders/docker
+    args: ["push", "${_REPO}:${_IMG_TAG}"]
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REPO}:${_IMG_TAG}
+      - --region=${_REGION}
+      - --allow-unauthenticated
+      - --set-env-vars=DATABASE_URL=${_DB_URL}
+      - --add-cloudsql-instances=${_SQL_CONN_NAME}
+# Store secrets in Secret Manager and use --set-secrets for production.
+
+images:
+  - "${_REPO}:${_IMG_TAG}"
