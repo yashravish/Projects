@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+.pytest_cache/
+.coverage
+.coverage.*
+.cache/
+.DS_Store
+
+# Frontend
+node_modules/
+dist/
+.vite/
+playwright-report/
+test-results/
+
+# Docker
+*.log
