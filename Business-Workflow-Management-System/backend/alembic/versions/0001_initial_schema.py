@@ -43,13 +43,6 @@ audit_action_enum = sa.Enum(
 
 
 def upgrade() -> None:
-    bind = op.get_bind()
-    user_role_enum.create(bind, checkfirst=True)
-    task_status_enum.create(bind, checkfirst=True)
-    task_priority_enum.create(bind, checkfirst=True)
-    approval_decision_enum.create(bind, checkfirst=True)
-    audit_action_enum.create(bind, checkfirst=True)
-
     op.create_table(
         "users",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
@@ -58,7 +51,7 @@ def upgrade() -> None:
         sa.Column("hashed_password", sa.String(length=255), nullable=False),
         sa.Column(
             "role",
-            sa.Enum(name="user_role", create_type=False),
+            user_role_enum,
             nullable=False,
         ),
         sa.Column(
@@ -84,13 +77,13 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=False, server_default=""),
         sa.Column(
             "status",
-            sa.Enum(name="task_status", create_type=False),
+            task_status_enum,
             nullable=False,
             server_default="pending",
         ),
         sa.Column(
             "priority",
-            sa.Enum(name="task_priority", create_type=False),
+            task_priority_enum,
             nullable=False,
             server_default="medium",
         ),
@@ -136,12 +129,12 @@ def upgrade() -> None:
         ),
         sa.Column(
             "from_status",
-            sa.Enum(name="task_status", create_type=False),
+            task_status_enum,
             nullable=True,
         ),
         sa.Column(
             "to_status",
-            sa.Enum(name="task_status", create_type=False),
+            task_status_enum,
             nullable=False,
         ),
         sa.Column(
@@ -182,7 +175,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "decision",
-            sa.Enum(name="approval_decision", create_type=False),
+            approval_decision_enum,
             nullable=False,
         ),
         sa.Column("comment", sa.String(length=500), nullable=True),
@@ -212,7 +205,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "action",
-            sa.Enum(name="audit_action", create_type=False),
+            audit_action_enum,
             nullable=False,
         ),
         sa.Column("entity_type", sa.String(length=50), nullable=False),

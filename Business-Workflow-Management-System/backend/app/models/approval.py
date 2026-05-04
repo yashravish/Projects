@@ -37,6 +37,7 @@ class Approval(Base, IdMixin):
         SAEnum(
             ApprovalDecision,
             name="approval_decision",
+            create_type=False,
             values_callable=lambda x: [e.value for e in x],
         ),
         nullable=False,

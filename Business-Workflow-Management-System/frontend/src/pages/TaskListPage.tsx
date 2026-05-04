@@ -109,7 +109,7 @@ export default function TaskListPage() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Title, description, assignee..."
+            placeholder="Search title, description, or owner"
           />
         </div>
       </section>

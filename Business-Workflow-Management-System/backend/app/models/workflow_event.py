@@ -24,11 +24,21 @@ class WorkflowEvent(Base, IdMixin):
         index=True,
     )
     from_status: Mapped[Optional[TaskStatus]] = mapped_column(
-        SAEnum(TaskStatus, name="task_status", create_type=False),
+        SAEnum(
+            TaskStatus,
+            name="task_status",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=True,
     )
     to_status: Mapped[TaskStatus] = mapped_column(
-        SAEnum(TaskStatus, name="task_status", create_type=False),
+        SAEnum(
+            TaskStatus,
+            name="task_status",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=False,
     )
     changed_by_user_id: Mapped[int] = mapped_column(
