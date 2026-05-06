@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: riskflow-engine
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/riskflow}
+    username: ${SPRING_DATASOURCE_USERNAME:riskflow}
+    password: ${SPRING_DATASOURCE_PASSWORD:riskflow}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+server:
+  port: 8080
+logging:
+  level:
+    com.riskflow: INFO
